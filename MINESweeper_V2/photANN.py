@@ -38,10 +38,10 @@ class Net(nn.Module):
     x = (x.data.numpy()-self.xmin)/(self.xmax-self.xmin)
     return Variable(torch.from_numpy(x).type(dtype))
 
-class nn(object):
+class ANN(object):
   """docstring for nnBC"""
   def __init__(self, nnh5=None):
-    super(nn, self).__init__()
+    super(ANN, self).__init__()
     self.nnh5 = nnh5
     th5 = h5py.File(self.nnh5,'r')
     D_in = th5['model/lin1.weight'].shape[1]

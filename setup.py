@@ -14,12 +14,12 @@ except ImportError:
 
     
 setup(
-    name="MINESweeper",
+    name="MINESweeper_V2",
     url="https://github.com/pacargile/MINESweeper_V2.0",
     version="2.0",
     author="Phillip Cargile",
     author_email="pcargile@cfa.harvard.edu",
-    packages=["MINESweeper"],
+    packages=["MINESweeper_V2"],
     license="LICENSE",
     description="MIST Isochrones w/ Nested Sampling",
     long_description=open("README.md").read(),
