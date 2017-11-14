@@ -74,7 +74,7 @@ class MINESweeper(object):
 		priordict = kwargs.get('priordict',None)
 
 		# set the weighting scheme if user set
-		self.ageweight = kwargs.get('ageweight',False)
+		self.ageweight = kwargs.get('ageweight',True)
 		if self.ageweight:
 			self.outfilepars.append('Agewgt')
 
