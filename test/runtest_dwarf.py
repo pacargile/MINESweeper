@@ -133,4 +133,4 @@ print('Init Mass: 1.0 Msol')
 print('Dist: 10pc')
 print('Av: 0.1')
 
-MS.run(datadict=datadict,priordict=priordict,output='TEST_MIST_v1.2_p1Linwgt.dat',ageweight=True)
+MS.run(datadict=datadict,priordict=priordict,output='TEST_MIST_v1.2_p1Linwgt_dwarf.dat',ageweight=True)

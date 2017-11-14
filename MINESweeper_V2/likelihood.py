@@ -15,7 +15,7 @@ class likelihood(object):
 
 		# if there is photometry, init the NN for those bands
 		if 'filterarray' in MISTinfo.keys():
-			self.ANNfn = self._initphotnn(MISTinfo['filterarray'])
+			self.ANNfn = self._initphotnn(MISTinfo['filterarray'],nnpath=MISTinfo['nnpath'])
 		else:
 			self.ANNfn = None
 
@@ -24,14 +24,18 @@ class likelihood(object):
 		# init MISTgen
 		return MISTgen(model=model,stripeindex=stripeindex,ageweight=ageweight)
 
-	def _initphotnn(self,filterarray):
+	def _initphotnn(self,filterarray,nnpath=None):
 		from .photANN import ANN
+		if type(nnpath) != type(None):
+			nnpath = nnpath
+		else:
+			nnpath = '/Users/pcargile/Astro/MIST/nnMIST/'
+
 		ANNdict = {}
 		for ff in filterarray:
 			try:
 				ANNdict[ff] = ANN(
-					# nnh5='/n/conroyfs1/pac/ThePayne/SED/nnMIST_{0}.h5'.format(ff))
-					nnh5='/Users/pcargile/Astro/MIST/nnMIST/nnMIST_{0}.h5'.format(ff))
+					nnh5=nnpath+'nnMIST_{0}.h5'.format(ff))
 			except IOError:
 				print('Cannot find NN HDF5 file for {0}'.format(ff))
 		return ANNdict
@@ -75,7 +79,7 @@ class likelihood(object):
 		parallax = None
 
 		if 'Agewgt' in modMIST.keys():
-			lnlike += 1.0*np.log(modMIST['Agewgt'])
+			lnlike += np.log(modMIST['Agewgt'])
 
 		# place a likelihood prob on star's age being within a 
 		# rough estimate of a Hubble time ~16 Gyr

@@ -106,6 +106,7 @@ class MINESweeper(object):
 		inphot = datadict.get('phot',None)
 		if type(inphot) != type(None):
 			self.MISTinfo['filterarray'] = inphot.keys()
+			self.MISTinfo['nnpath'] = datadict.get('nnpath',None)
 			self.outfilepars = self.outfilepars+['Dist','Av']
 			self.ndim = 5
 
