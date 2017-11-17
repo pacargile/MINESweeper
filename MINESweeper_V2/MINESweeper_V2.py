@@ -63,6 +63,9 @@ class MINESweeper(object):
 
 
 	def run(self,*args,**kwargs):
+		# set verbose
+		self.verbose = kwargs.get('verbose',True)
+
 		# check to make sure there is a datadict, can't fit otherwise
 		if 'datadict' in kwargs:
 			datadict = kwargs['datadict']
@@ -138,7 +141,7 @@ class MINESweeper(object):
 		self.priorfn = self.priors(priordict)
 
 		# initialize the likelihood class
-		self.likefn = self.likelihood(datadict,MISTinfo,ageweight=self.ageweight)
+		self.likefn = self.likelihood(datadict,MISTinfo,ageweight=self.ageweight,verbose=self.verbose)
 
 		# pick random point within grid as starting active points
 
@@ -164,9 +167,10 @@ class MINESweeper(object):
 		delta_logz_final = samplerdict.get('delta_logz_final',0.01)
 		flushnum = samplerdict.get('flushnum',10)
 
-		print(
-			'Start Dynesty w/ {0} number of samples w/ stopping criteria of dlog(z) = {1}'.format(
-				npoints,delta_logz_final))
+		if self.verbose:
+			print(
+				'Start Dynesty w/ {0} number of samples w/ stopping criteria of dlog(z) = {1}'.format(
+					npoints,delta_logz_final))
 		startmct = datetime.now()
 		sys.stdout.flush()
 
@@ -207,26 +211,28 @@ class MINESweeper(object):
 			self.outff.write('\n')
 
 			ncall += nc
+
 			if (it%flushnum) == 0:
 				self.outff.flush()
 
-				# format/output results
-				if logz < -1e6:
-					logz = -np.inf
-				if delta_logz > 1e6:
-					delta_logz = np.inf
-				if logzvar >= 0.:
-					logzerr = np.sqrt(logzvar)
-				else:
-					logzerr = np.nan
-				if logzerr > 1e6:
-					logzerr = np.inf
-					
-				sys.stdout.write("\riter: {0:d} | nc: {1:d} | ncall: {2:d} | eff(%): {3:6.3f} | "
-					"logz: {4:6.3f} +/- {5:6.3f} | dlogz: {6:6.3f} > {7:6.3f}      "
-					.format(nit + it, nc, ncall, eff, 
-						logz, logzerr, delta_logz, delta_logz_final))
-				sys.stdout.flush()
+				if self.verbose:
+					# format/output results
+					if logz < -1e6:
+						logz = -np.inf
+					if delta_logz > 1e6:
+						delta_logz = np.inf
+					if logzvar >= 0.:
+						logzerr = np.sqrt(logzvar)
+					else:
+						logzerr = np.nan
+					if logzerr > 1e6:
+						logzerr = np.inf
+						
+					sys.stdout.write("\riter: {0:d} | nc: {1:d} | ncall: {2:d} | eff(%): {3:6.3f} | "
+						"logz: {4:6.3f} +/- {5:6.3f} | dlogz: {6:6.3f} > {7:6.3f}      "
+						.format(nit + it, nc, ncall, eff, 
+							logz, logzerr, delta_logz, delta_logz_final))
+					sys.stdout.flush()
 
 		# add live points to sampler object
 		for it2, results in enumerate(dy_sampler.add_live_points()):
@@ -254,29 +260,31 @@ class MINESweeper(object):
 
 			ncall += nc
 
-			# format/output results
-			if logz < -1e6:
-				logz = -np.inf
-			if delta_logz > 1e6:
-				delta_logz = np.inf
-			if logzvar >= 0.:
-				logzerr = np.sqrt(logzvar)
-			else:
-				logzerr = np.nan
-			if logzerr > 1e6:
-				logzerr = np.inf
-			sys.stdout.write("\riter: {:d} | nc: {:d} | ncall: {:d} | eff(%): {:6.3f} | "
-				"logz: {:6.3f} +/- {:6.3f} | dlogz: {:6.3f} > {:6.3f}      "
-				.format(nit + it2, nc, ncall, eff, 
-					logz, logzerr, delta_logz, delta_logz_final))
+			if self.verbose:
+				# format/output results
+				if logz < -1e6:
+					logz = -np.inf
+				if delta_logz > 1e6:
+					delta_logz = np.inf
+				if logzvar >= 0.:
+					logzerr = np.sqrt(logzvar)
+				else:
+					logzerr = np.nan
+				if logzerr > 1e6:
+					logzerr = np.inf
+				sys.stdout.write("\riter: {:d} | nc: {:d} | ncall: {:d} | eff(%): {:6.3f} | "
+					"logz: {:6.3f} +/- {:6.3f} | dlogz: {:6.3f} > {:6.3f}      "
+					.format(nit + it2, nc, ncall, eff, 
+						logz, logzerr, delta_logz, delta_logz_final))
 
-			sys.stdout.flush()
+				sys.stdout.flush()
 
 		self.outff.close()
 		sys.stdout.write('\n')
 
 		finishtime = datetime.now()
-		print('RUN TIME: {0}'.format(finishtime-startmct))
+		if self.verbose:
+			print('RUN TIME: {0}'.format(finishtime-startmct))
 
 		return dy_sampler		
 

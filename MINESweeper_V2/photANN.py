@@ -40,8 +40,10 @@ class Net(nn.Module):
 
 class ANN(object):
   """docstring for nnBC"""
-  def __init__(self, ff, nnpath=None):
+  def __init__(self, ff, nnpath=None,**kwargs):
     super(ANN, self).__init__()
+
+    self.verbose = kwargs.get('verbose',True)
 
     if nnpath != None:
       self.nnpath = nnpath

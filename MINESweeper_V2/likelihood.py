@@ -5,6 +5,8 @@ class likelihood(object):
 	def __init__(self,datadict,MISTinfo,**kwargs):
 		super(likelihood, self).__init__()
 
+		self.verbose = kwargs.get('verbose',True)
+
 		ageweight = kwargs.get('ageweight',False)
 
 		# the dictionary with all data for likelihood
@@ -22,7 +24,7 @@ class likelihood(object):
 	def _initMIST(self,model=None,stripeindex=None,ageweight=False):
 		from .MISTmod import MISTgen
 		# init MISTgen
-		return MISTgen(model=model,stripeindex=stripeindex,ageweight=ageweight)
+		return MISTgen(model=model,stripeindex=stripeindex,ageweight=ageweight,verbose=self.verbose)
 
 	def _initphotnn(self,filterarray,nnpath=None):
 		from .photANN import ANN
@@ -30,7 +32,7 @@ class likelihood(object):
 		ANNdict = {}
 		for ff in filterarray:
 			try:
-				ANNdict[ff] = ANN(ff,nnh5=nnpath)
+				ANNdict[ff] = ANN(ff,nnpath=nnpath,verbose=self.verbose)
 			except IOError:
 				print('Cannot find NN HDF5 file for {0}'.format(ff))
 		return ANNdict
