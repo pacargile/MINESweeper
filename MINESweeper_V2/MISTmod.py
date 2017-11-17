@@ -37,17 +37,17 @@ class MISTgen(object):
 		# check for a user defined model
 		model = kwargs.get('model',None)
 
-		# define aliases for the MIST isochrones and C3K/CKC files
-		currentpath = __file__
-		if currentpath[-1] == 'c':
-			removeind = -27
-		else:
-			removeind = -26
-		self.MISTpath = os.path.dirname(__file__[:removeind]+'data/MIST/')
-
 		if model != None:
 			self.mistfile = model
 		else:
+			# define aliases for the MIST isochrones and C3K/CKC files
+			currentpath = __file__
+			if currentpath[-1] == 'c':
+				removeind = -27
+			else:
+				removeind = -26
+			self.MISTpath = os.path.dirname(__file__[:removeind]+'data/MIST/')
+
 			self.mistfile = self.MISTpath+'/MIST_1.2_EEPtrk.h5'
 
 		self.verbose = kwargs.get('verbose',True)

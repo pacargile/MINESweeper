@@ -26,16 +26,11 @@ class likelihood(object):
 
 	def _initphotnn(self,filterarray,nnpath=None):
 		from .photANN import ANN
-		if type(nnpath) != type(None):
-			nnpath = nnpath
-		else:
-			nnpath = '/Users/pcargile/Astro/MIST/nnMIST/'
 
 		ANNdict = {}
 		for ff in filterarray:
 			try:
-				ANNdict[ff] = ANN(
-					nnh5=nnpath+'nnMIST_{0}.h5'.format(ff))
+				ANNdict[ff] = ANN(ff,nnh5=nnpath)
 			except IOError:
 				print('Cannot find NN HDF5 file for {0}'.format(ff))
 		return ANNdict

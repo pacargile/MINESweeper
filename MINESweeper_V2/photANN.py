@@ -40,10 +40,25 @@ class Net(nn.Module):
 
 class ANN(object):
   """docstring for nnBC"""
-  def __init__(self, nnh5=None):
+  def __init__(self, ff, nnpath=None):
     super(ANN, self).__init__()
-    self.nnh5 = nnh5
+
+    if nnpath != None:
+      self.nnpath = nnpath
+    else:
+      # define aliases for the MIST isochrones and C3K/CKC files
+      currentpath = __file__
+      if currentpath[-1] == 'c':
+        removeind = -27
+      else:
+        removeind = -26
+      self.nnpath = os.path.dirname(__file__[:removeind]+'data/nnMIST/')
+
+    self.nnpath = nnpath
+    self.nnh5 = self.nnpath+'nnMIST_{0}.h5'.format(ff)
+
     th5 = h5py.File(self.nnh5,'r')
+    
     D_in = th5['model/lin1.weight'].shape[1]
     H = th5['model/lin1.weight'].shape[0]
     D_out = th5['model/lin3.weight'].shape[0]
