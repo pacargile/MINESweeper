@@ -211,6 +211,7 @@ class MINESweeper(object):
 			self.outff.write('\n')
 
 			ncall += nc
+			nit += it
 
 			if (it%flushnum) == 0:
 				self.outff.flush()
@@ -230,7 +231,7 @@ class MINESweeper(object):
 						
 					sys.stdout.write("\riter: {0:d} | nc: {1:d} | ncall: {2:d} | eff(%): {3:6.3f} | "
 						"logz: {4:6.3f} +/- {5:6.3f} | dlogz: {6:6.3f} > {7:6.3f}      "
-						.format(nit + it, nc, ncall, eff, 
+						.format(nit, nc, ncall, eff, 
 							logz, logzerr, delta_logz, delta_logz_final))
 					sys.stdout.flush()
 
@@ -287,29 +288,3 @@ class MINESweeper(object):
 			print('RUN TIME: {0}'.format(finishtime-startmct))
 
 		return dy_sampler		
-
-	"""
-	# write out final live points to output file
-		self.res = dy_sampler.results
-		for jj,vv in enumerate(self.res['samples'][-self.res['nlive']:]):
-			niter = range(1,self.res['niter']+1)[jj]+it
-			logl = self.res['logl'][-self.res['nlive']:][jj]
-			logvol = self.res['logvol'][-self.res['nlive']:][jj]
-			logwt = self.res['logwt'][-self.res['nlive']:][jj]
-			h = self.res['information'][-self.res['nlive']:][jj]
-			nc = self.res['ncall'][-self.res['nlive']:][jj]
-			logz = self.res['logz'][-self.res['nlive']:][jj]
-			delta_logz = delta_logz_final
-
-			self.outff.write('{0} '.format(niter))
-			# self.outff.write(' '.join([str(q) for q in vv]))
-			lnlike_i = self.likefn.like(vstar)
-
-			for pp in self.outfilepars:
-				self.outff.write('{0} '.format(self.likefn.MIST_i[pp]))			
-			self.outff.write(' {0} {1} {2} {3} {4} {5} {6} '.format(
-				logl,logvol,logwt,h,nc,logz,delta_logz))
-			self.outff.write('\n')
-		"""
-
-
