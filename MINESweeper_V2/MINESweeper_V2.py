@@ -211,7 +211,7 @@ class MINESweeper(object):
 			self.outff.write('\n')
 
 			ncall += nc
-			nit += it
+			nit = it
 
 			if (it%flushnum) == 0:
 				self.outff.flush()
