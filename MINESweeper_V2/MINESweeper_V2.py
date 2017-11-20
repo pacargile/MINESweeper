@@ -162,10 +162,11 @@ class MINESweeper(object):
 		npoints = samplerdict.get('npoints',200)
 		samplertype = samplerdict.get('samplertype','multi')
 		bootstrap = samplerdict.get('bootstrap',0)
-		update_interval = samplerdict.get('update_interval',float(self.ndim))
+		update_interval = samplerdict.get('update_interval',0.6)
 		samplemethod = samplerdict.get('samplemethod','unif')
 		delta_logz_final = samplerdict.get('delta_logz_final',0.01)
 		flushnum = samplerdict.get('flushnum',10)
+		maxiter = samplerdict.get('maxiter',sys.maxint)
 
 		if self.verbose:
 			print(
@@ -213,7 +214,7 @@ class MINESweeper(object):
 			ncall += nc
 			nit = it
 
-			if (it%flushnum) == 0:
+			if ((it%flushnum) == 0) or (it == maxiter):
 				self.outff.flush()
 
 				if self.verbose:
@@ -234,6 +235,8 @@ class MINESweeper(object):
 						.format(nit, nc, ncall, eff, 
 							logz, logzerr, delta_logz, delta_logz_final))
 					sys.stdout.flush()
+			if (it == maxiter):
+				break
 
 		# add live points to sampler object
 		for it2, results in enumerate(dy_sampler.add_live_points()):
@@ -241,7 +244,7 @@ class MINESweeper(object):
 			(worst, ustar, vstar, loglstar, logvol, logwt, logz, logzvar,
 			h, nc, worst_it, boundidx, bounditer, eff, delta_logz) = results
 
-			self.outff.write('{0} '.format(it2))
+			self.outff.write('{0} '.format(nit+it2))
 
 			lnlike_i = self.likefn.like(vstar)
 
