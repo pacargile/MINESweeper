@@ -82,12 +82,17 @@ class priors(object):
 		mass = par[1]
 		FeH = par[2]
 
+		parnamearr = ['EEP','initial_mass','initial_[Fe/H]']
+		pararr = [eep,mass,FeH]
+
 		if len(par) > 3:
 			dist = par[3]
 			Av   = par[4]
+			parnamearr = parnamearr + ['Dist','Av']
+			pararr = pararr + [dist,Av]
 
 		# check if EEP, Age, [Fe/H]in, Av, or Dist has an additional prior
-		for name_i,par_i in zip(['EEP','initial_mass','initial_[Fe/H]','Dist','Av'],[eep,mass,FeH,dist,Av]):
+		for name_i,par_i in zip(parnamearr,pararr):
 			# check to see if par is in addpriors
 			if name_i in self.addpriors.keys():
 				# conditional on the type of prior
