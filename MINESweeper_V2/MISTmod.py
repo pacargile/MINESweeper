@@ -8,7 +8,10 @@ stellar parameters.
 
 import os
 import numpy as np
-import h5py
+import warnings
+with warnings.catch_warnings():
+	warnings.simplefilter('ignore')
+	import h5py
 from scipy.spatial import cKDTree
 from scipy.interpolate import LinearNDInterpolator
 
@@ -70,6 +73,11 @@ class MISTgen(object):
 			'log_age','star_mass','log_R','log_L',
 			'log_Teff','[Fe/H]','log_g',
 			])
+		renameparr = ([
+			'EEP','initial_mass','initial_[Fe/H]','initial_[a/Fe]',
+			'log(Age)','Mass','log(Rad)','log(L)',
+			'log(Teff)','[Fe/H]','log(g)',
+			])
 
 		for kk in misth5['index']:
 			# read in MIST array
@@ -82,15 +90,16 @@ class MISTgen(object):
 				self.mist = np.concatenate([self.mist,mist_i])
 
 		# rename the fields to better column names
-		self.mist = recfunctions.rename_fields(self.mist,
-			{
-			'log_age':'log(Age)',
-			'star_mass':'Mass',
-			'log_R':'log(Rad)',
-			'log_L':'log(L)',
-			'log_Teff':'log(Teff)',
-			'log_g':'log(g)',
-			})
+		# self.mist = recfunctions.rename_fields(self.mist,
+		# 	{
+		# 	'log_age':'log(Age)',
+		# 	'star_mass':'Mass',
+		# 	'log_R':'log(Rad)',
+		# 	'log_L':'log(L)',
+		# 	'log_Teff':'log(Teff)',
+		# 	'log_g':'log(g)',
+		# 	})
+		self.mist.dtype.names = renameparr
 
 		if self.ageweight:
 			# determine a weighting scheme to equally weight mass tracks to 

@@ -11,7 +11,10 @@ dtype = torch.FloatTensor
 from torch.autograd import Variable
 import torch.nn.functional as F
 import numpy as np
-import h5py
+import warnings
+with warnings.catch_warnings():
+  warnings.simplefilter('ignore')
+  import h5py
 
 class Net(nn.Module):  
   def __init__(self, D_in, H, D_out):
@@ -58,6 +61,9 @@ class ANN(object):
 
     self.nnpath = nnpath
     self.nnh5 = self.nnpath+'nnMIST_{0}.h5'.format(ff)
+
+    if self.verbose:
+      print('Using Phot ANN: {0}'.format(self.nnh5))
 
     th5 = h5py.File(self.nnh5,'r')
     
