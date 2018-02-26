@@ -29,6 +29,8 @@ See [Authors](authors.rst) for a full list of contributors to MINESweeper.
 Requirements
 -------
 
+Currently, the code is only tested on Python 2.7.X. Use it with Python 3.X at your own risk.
+
 Python modules:
 
 * numpy
