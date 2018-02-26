@@ -50,7 +50,8 @@ docs/examples
 old/*
 
 # test directory
-test/*.dat
+demo/*.dat
 
 # data directory
-data/*
+data/MIST/*h5
+data/nnMIST/*h5
