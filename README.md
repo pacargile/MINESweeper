@@ -1,4 +1,5 @@
 # MINESweeper
+<<<<<<< HEAD
 =====
 
 Isochrone fitting code using latest mass-tracks from the MIST models.
@@ -62,3 +63,6 @@ License
 
 Copyright 2015 the authors. MINESweeper is open-source software released under 
 the MIT License. See the file ``LICENSE`` for details.
+=======
+Version 2.0 of MINESweeper Isochrone fitting code
+>>>>>>> 6f14cecbba94709e7049c931eda9b8ee6b98a916
