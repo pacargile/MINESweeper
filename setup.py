@@ -14,17 +14,27 @@ except ImportError:
 
     
 setup(
-    name="MINESweeper_V2",
-    url="https://github.com/pacargile/MINESweeper_V2.0",
+    name="MINESweeper",
+    url="https://github.com/pacargile/MINESweeper",
     version="2.0",
     author="Phillip Cargile",
     author_email="pcargile@cfa.harvard.edu",
-    packages=["MINESweeper_V2"],
+    packages=["minesweeper"],
     license="LICENSE",
     description="MIST Isochrones w/ Nested Sampling",
     long_description=open("README.md").read(),
     package_data={"": ["README.md", "LICENSE"]},
     include_package_data=True,
-    install_requires=["numpy", "scipy", "dynesty"],
+    install_requires=["numpy", "scipy", "dynesty","torch","h5py"],
 )
 
+# write top level __init__.py file with the correct absolute path to package repo
+toplevelstr = ("""try:
+    from ._version import __version__
+except(ImportError):
+    pass"""
+)
+with open('minesweeper/__init__.py','w') as ff:
+  ff.write(toplevelstr)
+  ff.write('\n')
+  ff.write("""__abspath__ = '{0}/'\n""".format(os.getcwd()))

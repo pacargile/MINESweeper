@@ -1,6 +1,5 @@
-from MINESweeper_V2 import MINESweeper_V2
-
-MS = MINESweeper_V2.MINESweeper()
+from minesweeper import MINESweeper
+MS = MINESweeper.MINESweeper()
 
 
 """
@@ -109,22 +108,28 @@ priordict['Dist']['noninform'] = [0,100.0]
 priordict['Av']['noninform'] = [0,0.5]
 
 datadict = {'pars':{},'phot':{}}
-datadict['pars']['Teff'] = [10.0**3.76624868855,100.0]
-datadict['pars']['log(g)'] = [4.43208853353,0.1]
-datadict['pars']['[Fe/H]'] = [-0.01430655,0.1]
+datadict['pars']['Teff'] = [10.0**3.76624868855,250.0]
+datadict['pars']['log(g)'] = [4.43208853353,0.25]
+datadict['pars']['[Fe/H]'] = [-0.01430655,0.25]
 
-datadict['phot']['SDSS_u']  = [6.391256141,0.01]
-datadict['phot']['SDSS_g']  = [5.103466557,0.01]
-datadict['phot']['SDSS_r']  = [4.655638622,0.01]
-datadict['phot']['SDSS_i']  = [4.528017150,0.01]
-datadict['phot']['SDSS_z']  = [4.529033499,0.01]
-datadict['phot']['2MASS_J'] = [3.644908236,0.01]
-datadict['phot']['2MASS_H'] = [3.312467383,0.01]
-datadict['phot']['2MASS_Ks']= [3.271397995,0.01]
-datadict['phot']['WISE_W1'] = [3.260185407,0.01]
-datadict['phot']['WISE_W2'] = [3.265715050,0.01]
-datadict['phot']['WISE_W3'] = [3.222959088,0.01]
-datadict['phot']['WISE_W4'] = [3.236377047,0.01]
+datadict['phot']['SDSS_u']  = [6.391256141,0.05]
+datadict['phot']['SDSS_g']  = [5.103466557,0.05]
+datadict['phot']['SDSS_r']  = [4.655638622,0.05]
+datadict['phot']['SDSS_i']  = [4.528017150,0.05]
+datadict['phot']['SDSS_z']  = [4.529033499,0.05]
+datadict['phot']['2MASS_J'] = [3.644908236,0.05]
+datadict['phot']['2MASS_H'] = [3.312467383,0.05]
+datadict['phot']['2MASS_Ks']= [3.271397995,0.05]
+datadict['phot']['WISE_W1'] = [3.260185407,0.05]
+datadict['phot']['WISE_W2'] = [3.265715050,0.05]
+datadict['phot']['WISE_W3'] = [3.222959088,0.05]
+datadict['phot']['WISE_W4'] = [3.236377047,0.05]
+
+datadict['sampler'] = {}
+datadict['sampler']['samplemethod'] = 'rwalk'
+datadict['sampler']['npoints'] = 50
+datadict['sampler']['samplertype'] = 'single'
+datadict['sampler']['flushnum'] = 100
 
 print('TEST MOCK STAR:')
 print('----- TRUTH -----')
@@ -133,4 +138,4 @@ print('Init Mass: 1.0 Msol')
 print('Dist: 10pc')
 print('Av: 0.1')
 
-MS.run(datadict=datadict,priordict=priordict,output='TEST_MIST_v1.2_p1Linwgt_dwarf.dat',ageweight=True)
+MS.run(datadict=datadict,priordict=priordict,output='TEST_MIST_dwarf.dat')

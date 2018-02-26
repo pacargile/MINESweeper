@@ -16,6 +16,8 @@ with warnings.catch_warnings():
   warnings.simplefilter('ignore')
   import h5py
 
+import minesweeper
+
 class Net(nn.Module):  
   def __init__(self, D_in, H, D_out):
     super(Net, self).__init__()
@@ -48,18 +50,20 @@ class ANN(object):
 
     self.verbose = kwargs.get('verbose',True)
 
-    if nnpath != None:
-      self.nnpath = nnpath
-    else:
-      # define aliases for the MIST isochrones and C3K/CKC files
-      currentpath = __file__
-      if currentpath[-1] == 'c':
-        removeind = -27
-      else:
-        removeind = -26
-      self.nnpath = os.path.dirname(__file__[:removeind]+'data/nnMIST/')
+    self.nnpath = kwargs.get('nnpath',None)
 
-    self.nnpath = nnpath
+    if self.nnpath == None:
+      self.nnpath = minesweeper.__abspath__+'data/nnMIST/'
+    # else:
+    #   # define aliases for the MIST isochrones and C3K/CKC files
+    #   currentpath = __file__
+    #   if currentpath[-1] == 'c':
+    #     removeind = -27
+    #   else:
+    #     removeind = -26
+    #   self.nnpath = os.path.dirname(__file__[:removeind]+'data/nnMIST/')
+    # self.nnpath = nnpath
+
     self.nnh5 = self.nnpath+'nnMIST_{0}.h5'.format(ff)
 
     if self.verbose:

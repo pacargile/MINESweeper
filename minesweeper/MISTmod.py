@@ -16,14 +16,15 @@ from scipy.spatial import cKDTree
 from scipy.interpolate import LinearNDInterpolator
 
 from numpy.lib import recfunctions
+import minesweeper
 
-# define aliases for the MIST EEP tracks
-currentpath = __file__
-if currentpath[-1] == 'c':
-	removeind = -27
-else:
-	removeind = -26
-MISTFILE_DEFAULT = os.path.dirname(__file__[:removeind]+'data/MIST/')
+# # define aliases for the MIST EEP tracks
+# currentpath = __file__
+# if currentpath[-1] == 'c':
+# 	removeind = -27
+# else:
+# 	removeind = -26
+# MISTFILE_DEFAULT = os.path.dirname(__file__[:removeind]+'data/MIST/')
 
 class MISTgen(object):
 	"""
@@ -38,20 +39,21 @@ class MISTgen(object):
 		super(MISTgen, self).__init__()
 
 		# check for a user defined model
-		model = kwargs.get('model',None)
+		self.mistfile = kwargs.get('model',None)
 
-		if model != None:
-			self.mistfile = model
-		else:
-			# define aliases for the MIST isochrones and C3K/CKC files
-			currentpath = __file__
-			if currentpath[-1] == 'c':
-				removeind = -27
-			else:
-				removeind = -26
-			self.MISTpath = os.path.dirname(__file__[:removeind]+'data/MIST/')
+		# model = kwargs.get('model',None)
+		if self.mistfile == None:
+			self.mistfile = minesweeper.__abspath__+'data/MIST/MIST_1.2_EEPtrk.h5'
+		# else:
+		# 	# define aliases for the MIST isochrones and C3K/CKC files
+		# 	currentpath = __file__
+		# 	if currentpath[-1] == 'c':
+		# 		removeind = -27
+		# 	else:
+		# 		removeind = -26
+		# 	self.MISTpath = os.path.dirname(__file__[:removeind]+'data/MIST/')
 
-			self.mistfile = self.MISTpath+'/MIST_1.2_EEPtrk.h5'
+		# 	self.mistfile = self.MISTpath+'/MIST_1.2_EEPtrk.h5'
 
 		self.verbose = kwargs.get('verbose',True)
 

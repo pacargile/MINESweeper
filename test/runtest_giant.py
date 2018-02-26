@@ -1,6 +1,5 @@
-from MINESweeper_V2 import MINESweeper_V2
-
-MS = MINESweeper_V2.MINESweeper()
+from minesweeper import MINESweeper
+MS = MINESweeper.MINESweeper()
 
 
 """
@@ -127,6 +126,12 @@ datadict['phot']['WISE_W2']  = [-0.536521796875,0.01]
 datadict['phot']['WISE_W3']  = [-0.546512489014,0.01]
 datadict['phot']['WISE_W4']  = [-0.561262850456,0.01]
 
+datadict['sampler'] = {}
+datadict['sampler']['samplemethod'] = 'rwalk'
+datadict['sampler']['npoints'] = 50
+datadict['sampler']['samplertype'] = 'single'
+datadict['sampler']['flushnum'] = 100
+
 print('TEST MOCK STAR:')
 print('----- TRUTH -----')
 print('Age: 0.721602232975 Gyr (log(Age) = 8.85829786845)')
@@ -134,4 +139,4 @@ print('Init Mass: 2.0 Msol')
 print('Dist: 10pc')
 print('Av: 0.1')
 
-MS.run(datadict=datadict,priordict=priordict,output='TEST_MIST_v1.2_p2Linwgt_giant.dat',ageweight=True)
+MS.run(datadict=datadict,priordict=priordict,output='TEST_MIST_giant_v2.dat',ageweight=False)
