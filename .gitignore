@@ -48,3 +48,6 @@ docs/examples
 
 # old files
 old/*
+
+# test directory
+test/*.dat

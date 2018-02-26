@@ -79,7 +79,7 @@ class likelihood(object):
 		parallax = None
 
 		if 'Agewgt' in modMIST.keys():
-			lnlike += 2.0*np.log(modMIST['Agewgt'])
+			lnlike += np.log(modMIST['Agewgt'])
 
 		# place a likelihood prob on star's age being within a 
 		# rough estimate of a Hubble time ~16 Gyr

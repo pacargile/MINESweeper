@@ -1,7 +1,5 @@
-from MINESweeper_V2 import MINESweeper_V2
-
-MS = MINESweeper_V2.MINESweeper()
-
+from minesweeper import MINESweeper
+MS = MINESweeper.MINESweeper()
 
 """
 MOCK INFO FROM MIST
@@ -130,6 +128,12 @@ datadict['phot']['WISE_W2']   = [-6.78366080169,0.01]
 datadict['phot']['WISE_W3']   = [-7.033449086,0.01]
 datadict['phot']['WISE_W4']   = [-7.17153612022,0.01]
 
+datadict['sampler'] = {}
+datadict['sampler']['samplemethod'] = 'rwalk'
+datadict['sampler']['npoints'] = 50
+datadict['sampler']['samplertype'] = 'single'
+datadict['sampler']['flushnum'] = 100
+
 print('TEST MOCK STAR:')
 print('----- TRUTH -----')
 print('Age: 3.35968154631 Gyr (log(Age) = 9.52629811393)')
@@ -137,4 +141,4 @@ print('Init Mass: 1.5 Msol')
 print('Dist: 10pc')
 print('Av: 0.1')
 
-MS.run(datadict=datadict,priordict=priordict,output='TEST_MIST_v1.2_specpars_TRGB.dat',ageweight=True)
+MS.run(datadict=datadict,priordict=priordict,output='TEST_MIST_TRGB.dat')
