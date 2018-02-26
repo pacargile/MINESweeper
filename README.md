@@ -62,5 +62,3 @@ License
 
 Copyright 2015 the authors. MINESweeper is open-source software released under 
 the MIT License. See the file ``LICENSE`` for details.
-=======
-Version 2.0 of MINESweeper Isochrone fitting code
