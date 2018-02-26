@@ -33,11 +33,12 @@ Python modules:
 
 * numpy
 * scipy
-* dynesty
-* torch
 * h5py
+* dynesty 
 
-All of these modules can be installed using pip except torch. See PyTorch website for installation instructions.
+* torch 
+
+All of these modules can be installed using a simple pip install [package] except torch. See PyTorch website for installation instructions.
 
 Installation
 ------
