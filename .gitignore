@@ -51,3 +51,6 @@ old/*
 
 # test directory
 test/*.dat
+
+# data directory
+data/*
