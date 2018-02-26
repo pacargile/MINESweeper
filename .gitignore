@@ -1,5 +1,8 @@
 *.py[cod]
 
+# static init file
+minesweeper/__init__.py
+
 # C extensions
 *.so
 
