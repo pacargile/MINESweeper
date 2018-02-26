@@ -1,13 +1,15 @@
 # MINESweeper
 =====
 
+**M**IST **I**sochrones with **N**ested **E**llipsoidal **S**ampling
+
 Isochrone fitting code using latest mass-tracks from the MIST models.
 
 Version 2.0
 
-Model interpolation and nested-sampling infernce of observed stellar SED and/or parameters using the latest MIST stellar evolution models. The code has the following functionality:
+Model interpolation and nested-sampling inference of observed stellar SED and/or parameters using the latest MIST stellar evolution models. The code has the following functionality:
 
-* Uses a quick and efficent nearest-neighbor look up to quickly do N-D linear interpolation of MIST mass-tracks.
+* Uses a quick and efficient nearest-neighbor look up to quickly do N-D linear interpolation of MIST mass-tracks.
 
 * Samples MIST models in natural parameter space (EEP,initial_[Fe/H],initial_mass).
 
