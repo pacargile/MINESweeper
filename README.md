@@ -11,7 +11,7 @@ Model interpolation and nested-sampling infernce of observed stellar SED and/or 
 
 * Samples MIST models in natural parameter space (EEP,initial_[Fe/H],initial_mass).
 
-* Allows for likelihood comparison for any parameter avaliable from the MIST models.
+* Allows for likelihood comparison of any parameter predicted in the MIST models.
 
 A write up for the MINESweeper code is in prep., however, information regarding the MIST models can be found in [Choi et al. (2016)](http://adsabs.harvard.edu/abs/2016ApJ...823..102C), and detailed information about how we interpolate stellar models is given in [Dotter (2016)](http://adsabs.harvard.edu/abs/2016ApJS..222....8D). MINESweeper has been used in various studies, including: [Rodriguez et al. (2017)](http://adsabs.harvard.edu/abs/2017AJ....153..256R) and [Dotter et al. (2017)](http://adsabs.harvard.edu/abs/2017ApJ...840...99D).
 
