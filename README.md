@@ -60,5 +60,5 @@ To use MINESweepr the user must have the MIST mass-tracks in a HDF5 format, as w
 License
 --------
 
-Copyright 2015 the authors. MINESweeper is open-source software released under 
+Copyright 2018. MINESweeper is open-source software released under 
 the MIT License. See the file ``LICENSE`` for details.
