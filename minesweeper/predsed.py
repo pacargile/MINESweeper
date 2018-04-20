@@ -50,6 +50,6 @@ class FastPaynePredictor(object):
         m = -2.5 * logl + 4.74 - BC + mu
 
         try:
-	        return m[band_indices]
-	    except IndexError:
-	    	return m
+            return m[band_indices]
+        except IndexError:
+            return m
