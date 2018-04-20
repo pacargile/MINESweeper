@@ -16,29 +16,30 @@ class likelihood(object):
 		self.datadict = datadict
 
 		# init the MIST models
-		self.MISTgen = self._initMIST(model=MISTinfo['model'],stripeindex=MISTinfo['stripe'],ageweight=ageweight)
+		self.MISTgen = self._initMIST(
+			model=MISTinfo['model'],stripeindex=MISTinfo['stripe'],ageweight=ageweight)
 
 		# if there is photometry, init the NN for those bands
 		if 'filterarray' in MISTinfo.keys():
-			self.ANNfn = self._initphotnn(MISTinfo['filterarray'],nnpath=MISTinfo['nnpath'])
+
+			# from .predsed import PaynePredictor
+			# self.ppsed = PaynePredictor(
+			# 	usebands=MISTinfo['filterarray'],nnpath=MISTinfo['nnpath']
+			# 	)
+
+			from .predsed import FastPaynePredictor
+			self.fppsed = FastPaynePredictor(
+				usebands=MISTinfo['filterarray'],nnpath=MISTinfo['nnpath']
+				)
+
 		else:
-			self.ANNfn = None
+			self.ppsed = None
 
 	def _initMIST(self,model=None,stripeindex=None,ageweight=False):
 		from .MISTmod import MISTgen
 		# init MISTgen
 		return MISTgen(model=model,stripeindex=stripeindex,ageweight=ageweight,verbose=self.verbose)
 
-	def _initphotnn(self,filterarray,nnpath=None):
-		from .photANN import ANN
-
-		ANNdict = {}
-		for ff in filterarray:
-			try:
-				ANNdict[ff] = ANN(ff,nnpath=nnpath,verbose=self.verbose)
-			except IOError:
-				print('Cannot find NN HDF5 file for {0}'.format(ff))
-		return ANNdict
 		
 	def like(self,pars,returnarr=False):
 		# split pars into MIST and [Dist,Av]
@@ -117,19 +118,24 @@ class likelihood(object):
 
 			if type(inphot) != type(None):
 
-				# define some parameters from modMIST for the photomteric predictions
-				Teff = 10.0**modMIST['log(Teff)']
-				FeH  = modMIST['[Fe/H]']
-				logg = modMIST['log(g)']
+				# create parameter dictionary
+				photpars = {}
+				photpars['logt'] = modMIST['log(Teff)']
+				photpars['logg'] = modMIST['log(g)']
+				photpars['feh']  = modMIST['[Fe/H]']
+				photpars['logl'] = modMIST['log(L)']
+				photpars['av']   = Av
+				photpars['dist'] = dist
 
-				# calc bolometric magnitude
-				Mbol = -2.5*modMIST['log(L)']+4.74
+				# create filter list and arrange photometry to this list
+				filterlist = inphot.keys()
+				inphotlist = [inphot[x] for x in filterlist]
 
-				# for each filter, calculate predicted mag and calc likelihood
-				for kk in inphot.keys():
-					BC_i = float(self.ANNfn[kk].eval([Teff,logg,FeH,Av]))
-					modphot = (Mbol - BC_i) + 5.0*np.log10(dist) - 5.0
-					lnlike += -0.5 * ((modphot-inphot[kk][0])**2.0)/(inphot[kk][1]**2.0)
+				# sed = self.ppsed.sed(filters=filterlist,**photpars)
+				sed = self.fppsed.sed(**photpars)
+
+				for sed_i,inphot_i in zip(sed,inphotlist):
+					lnlike += -0.5 * ((sed_i-inphot_i[0])**2.0)/(inphot_i[1]**2.0)
 
 		return lnlike
 
