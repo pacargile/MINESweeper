@@ -8,6 +8,7 @@ The top-level code to initialize and run the MINESweeper fitter
 import sys,time,datetime, math,re
 from datetime import datetime
 import numpy as np
+from scipy.optimize import minimize, least_squares, basinhopping
 
 try:
 	import dynesty
@@ -33,6 +34,20 @@ def lnprob(pars,likefn,priorfn):
 	
 	return lnprior + lnlike	
 
+def lnprob_opt(pars,likefn,priorfn):
+	# # first pass pars into priorfn
+	# lnprior = -2.0*priorfn.likeprior(pars)
+
+	# # check to see if outside of a flat prior
+	# if lnprior == np.inf:
+	# 	return np.nan_to_num(np.inf)
+
+	lnlike = -2.0*np.array(likefn.like(pars,returnarr=False))
+	if lnlike == np.inf:
+		return np.nan_to_num(np.inf)
+	
+	return lnlike	
+
 
 class MINESweeper(object):
 	"""
@@ -53,14 +68,22 @@ class MINESweeper(object):
 		call instance so that run_dynesty can be called with multiprocessing
 		and still have all of the class instance variables
 
-		:params datadict:
+		:params indicts:
 			data dictionary containing all of the user defined data.
 			Also contains parameters specific for dynesty sampling,
 			e.g., number of active points
 
 		'''
-		self.run_dynesty(indicts)
+		# determine if the user wants to run a sampler or a regression
 
+		if 'sampler' in indicts[0].keys():
+			res = self.run_dynesty(indicts)
+		elif 'optimizer' in indicts[0].keys():
+			res = self.run_optim(indicts)
+		else:
+			print('ERROR: Did not specify the type of inference (Sampler or Optimizer)')
+			return None
+		return res
 
 	def run(self,*args,**kwargs):
 		# set verbose
@@ -119,8 +142,9 @@ class MINESweeper(object):
 			raise IOError
 		
 		# run the fitter
-		self([datadict,priordict,self.MISTinfo])
+		res = self([datadict,priordict,self.MISTinfo])
 
+		return res
 
 	def run_dynesty(self,indict):
 
@@ -129,10 +153,7 @@ class MINESweeper(object):
 		priordict = indict[1]
 		MISTinfo = indict[2]
 
-		if 'sampler' in datadict.keys():
-			samplerdict = datadict['sampler']
-		else:
-			samplerdict = {}
+		samplerdict = datadict['sampler']
 
 		# initialize output file
 		self._initoutput()
@@ -147,6 +168,8 @@ class MINESweeper(object):
 
 		# run sampler
 		sampler = self.runsampler(samplerdict)
+
+		return sampler
 
 	def _initoutput(self):
 		# init output file
@@ -291,3 +314,44 @@ class MINESweeper(object):
 			print('RUN TIME: {0}'.format(finishtime-startmct))
 
 		return dy_sampler		
+
+	def run_optim(self,indict):
+
+		# split input dict
+		datadict = indict[0]
+		priordict = indict[1]
+		MISTinfo = indict[2]
+
+		samplerdict = datadict['optimizer']
+
+		# # initialize output file
+		# self._initoutput()
+
+		# initialize the likelihood class
+		self.likefn = self.likelihood(datadict,MISTinfo,ageweight=self.ageweight,verbose=self.verbose)
+
+		# initialize the prior class
+		self.priorfn = self.priors(priordict)
+
+		# run optimizer
+		optres = self.runoptim(samplerdict)
+
+		return optres
+
+	def runoptim(self,samplerdict):
+		opttype = samplerdict.get('opttype','BFGS')
+		inpars = samplerdict.get('initial_guess',[400,1.0,0.0,20.0,0.5])
+		opt_tol = samplerdict.get('tol',None)
+		opt_options = samplerdict.get('opt_options',{})
+
+		# results = minimize(lnprob_opt,inpars,args=(self.likefn,self.priorfn),method=opttype,
+		# 	tol=opt_tol,options=opt_options)
+
+		# results = least_squares(lnprob_opt,inpars,args=(self.likefn,self.priorfn),
+		# 	verbose=1,method='lm',x_scale=[0.001,0.01,0.0001,100.0,10.0],)
+
+		results = basinhopping(lnprob_opt,inpars,
+			minimizer_kwargs={'args':(self.likefn,self.priorfn)},
+			niter=300,T=500.0,stepsize=1.0,disp=True)
+
+		return results
