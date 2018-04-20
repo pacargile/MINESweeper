@@ -103,11 +103,20 @@ class priors(object):
 					lnprior += -0.5 * (((par_i-self.addpriors[name_i]['gaussian'][0])**2.0)/
 						(self.addpriors[name_i]['gaussian'][1]**2.0))
 				elif 'broken' in self.addpriors[name_i].keys():
+					# broken expects three values:
+					#   - uniform prior from val0 to val1
+					#   - exponential decay from val1 to val2
+					#   - prob = 0 for par_i < val0 and par_i > val2
 					if par_i < self.addpriors[name_i]['broken'][0]:
 						return -np.inf
-					elif (par > self.addpriors[name_i]['broken'][2]):
+					elif par_i > self.addpriors[name_i]['broken'][2]:
+						return -np.inf
+					elif (
+						(par_i >= self.addpriors[name_i]['broken'][1]) and
+						(par_i <= self.addpriors[name_i]['broken'][2])
+						):
 						# exponential decay with 10% e-fold 
-						lnprior += -1.0 * (0.1)
+						lnprior += -1.0*((par_i-self.addpriors[name_i]['broken'][1])**2.0)/0.001
 					else:
 						pass
 				elif 'flat' in self.addpriors[name_i].keys():

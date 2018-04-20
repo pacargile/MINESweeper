@@ -102,9 +102,9 @@ EEP    350
 priordict = {x:{} for x in ['EEP','initial_mass','initial_[Fe/H]','Dist','Av']}
 
 priordict['EEP']['noninform'] = [0,808]
-priordict['initial_mass']['noninform'] = [0.5,2.0]
+priordict['initial_mass']['noninform'] = [0.1,10.0]
 priordict['initial_[Fe/H]']['noninform'] = [-1.0,0.5]
-priordict['Dist']['noninform'] = [0,100.0]
+priordict['Dist']['noninform'] = [0,1000.0]
 priordict['Av']['noninform'] = [0,0.5]
 
 datadict = {'pars':{},'phot':{}}
