@@ -75,8 +75,8 @@ class ANN(object):
     H = th5['model/lin1.weight'].shape[0]
     D_out = th5['model/lin3.weight'].shape[0]
     self.model = Net(D_in,H,D_out)
-    self.model.xmin = np.amin(np.array(th5['test/X']),axis=0)
-    self.model.xmax = np.amax(np.array(th5['test/X']),axis=0)
+    self.model.xmin = np.array(list(th5['xmin']))#np.amin(np.array(th5['test/X']),axis=0)
+    self.model.xmax = np.array(list(th5['xmax']))#np.amax(np.array(th5['test/X']),axis=0)
 
     newmoddict = {}
     for kk in th5['model'].keys():
