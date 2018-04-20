@@ -52,4 +52,4 @@ class FastPaynePredictor(object):
         try:
             return m[band_indices]
         except IndexError:
-            return m
+            return [m]
