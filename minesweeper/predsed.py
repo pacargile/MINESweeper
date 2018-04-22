@@ -44,7 +44,7 @@ class FastPaynePredictor(object):
             logl=0.0, av=0.0, dist=10.0, band_indices=slice(None)):
         """
         """
-        mu = 5 * np.log10(dist) - 5
+        mu = 5.0 * np.log10(dist) - 5.0
         BC = self.anns.eval([10**logt, logg, feh, av])
 
         m = -2.5 * logl + 4.74 - BC + mu

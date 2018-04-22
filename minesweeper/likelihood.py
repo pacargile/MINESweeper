@@ -12,12 +12,15 @@ class likelihood(object):
 
 		ageweight = kwargs.get('ageweight',False)
 
+		fastinterp = kwargs.get('fastinterp',True)
+
 		# the dictionary with all data for likelihood
 		self.datadict = datadict
 
 		# init the MIST models
 		self.MISTgen = self._initMIST(
-			model=MISTinfo['model'],stripeindex=MISTinfo['stripe'],ageweight=ageweight)
+			model=MISTinfo['model'],stripeindex=MISTinfo['stripe'],
+			ageweight=ageweight,fastinterp=fastinterp)
 
 		# if there is photometry, init the NN for those bands
 		if 'filterarray' in MISTinfo.keys():
@@ -33,7 +36,7 @@ class likelihood(object):
 				)
 
 		else:
-			self.ppsed = None
+			self.fppsed = None
 
 	def _initMIST(self,model=None,stripeindex=None,ageweight=False):
 		from .MISTmod import MISTgen
