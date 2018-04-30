@@ -3,6 +3,16 @@
 
 import numpy as np
 
+# dictionary to translate par names to MIST names
+MISTrename = {
+	'log_age':'log(Age)',
+	'star_mass':'Mass',
+	'log_R':'log(Rad)',
+	'log_L':'log(L)',
+	'log_Teff':'log(Teff)',
+	'log_g':'log(g)',
+}
+
 class likelihood(object):
 	"""docstring for likelihood"""
 	def __init__(self,datadict,MISTinfo,**kwargs):
@@ -14,34 +24,47 @@ class likelihood(object):
 
 		fastinterp = kwargs.get('fastinterp',True)
 
+		self.predictions = kwargs.get('predictions',None)
+
 		# the dictionary with all data for likelihood
 		self.datadict = datadict
 
 		# init the MIST models
 		self.MISTgen = self._initMIST(
 			model=MISTinfo['model'],stripeindex=MISTinfo['stripe'],
-			ageweight=ageweight,fastinterp=fastinterp)
+			ageweight=ageweight,fast=fastinterp,predictions=self.predictions)
 
 		# if there is photometry, init the NN for those bands
 		if 'filterarray' in MISTinfo.keys():
-
-			# from .predsed import PaynePredictor
-			# self.ppsed = PaynePredictor(
-			# 	usebands=MISTinfo['filterarray'],nnpath=MISTinfo['nnpath']
-			# 	)
-
-			from .predsed import FastPaynePredictor
-			self.fppsed = FastPaynePredictor(
-				usebands=MISTinfo['filterarray'],nnpath=MISTinfo['nnpath']
-				)
-
+			self.ppsed = self._initSED(
+				filterarray=MISTinfo['filterarray'],nnpath=MISTinfo['nnpath'])
 		else:
-			self.fppsed = None
+			self.ppsed = None
 
-	def _initMIST(self,model=None,stripeindex=None,ageweight=False):
-		from .MISTmod import MISTgen
-		# init MISTgen
-		return MISTgen(model=model,stripeindex=stripeindex,ageweight=ageweight,verbose=self.verbose)
+	def _initSED(self,filterarray=None,nnpath=None, fast=True,**kwargs):
+
+		if fast:
+			from .predsed import FastPaynePredictor
+			# init Payne Photometry module
+			return FastPaynePredictor(usebands=filterarray,nnpath=nnpath)
+		else:
+			# OLD SLOWER ANN BASED ON PYTORCH
+			from .predsed import PaynePredictor
+			return PaynePredictor(usebands=filterarray,nnpath=nnpath)
+
+	def _initMIST(self,model=None,ageweight=True,fast=True,predictions=None,**kwargs):
+
+		if fast:
+			from .fastMISTmod import fastMISTgen
+			return fastMISTgen(model=model,predictions=predictions,
+				ageweight=ageweight,verbose=self.verbose)
+		else:
+			# OLD SLOWER ANN BASED ON SCIPY INTERPOLATE
+			from .MISTmod import MISTgen
+			# init MISTgen
+			return MISTgen(
+				model=model,predictions=predictions,
+				ageweight=ageweight,verbose=self.verbose)
 
 		
 	def like(self,pars,returnarr=False):
@@ -59,13 +82,30 @@ class likelihood(object):
 			photpars = None
 
 		# run getMIST to pull model
-		self.MIST_i = self.MISTgen.getMIST(pars,verbose=False)
+		MIST_i_arr = self.MISTgen.getMIST(eep=eep,mass=mass,feh=FeH,verbose=False)
 
-		if self.MIST_i == "ValueError":
+		if type(MIST_i_arr) == type(None):
 			return -np.inf
 
-		self.MIST_i['Teff'] = 10.0**self.MIST_i['log(Teff)']
-		self.MIST_i['Rad']  = 10.0**self.MIST_i['log(Rad)']
+		# stick MIST model pars into useful dict format
+		self.MIST_i = ({
+			kk:pp for kk,pp in zip(
+				self.MISTgen.modpararr,MIST_i_arr)
+			})			
+
+		for kk in self.MIST_i.keys():
+			if kk in MISTrename.keys():
+				self.MIST_i[MISTrename[kk]] = self.MIST_i.pop(kk)
+
+		if 'log(Teff)' in self.MIST_i.keys():
+			self.MIST_i['Teff'] = 10.0**self.MIST_i['log(Teff)']
+		if 'log(Rad)' in self.MIST_i.keys():
+			self.MIST_i['Rad']  = 10.0**self.MIST_i['log(Rad)']
+
+		if type(photpars) != type(None):
+			self.MIST_i['Av'] = Av
+			self.MIST_i['Dist'] = dist
+
 
 		if returnarr:
 			return self.calclikearray(self.MIST_i,photpars)
@@ -108,7 +148,7 @@ class likelihood(object):
 			dist = photpars[0]
 			Av = photpars[1]
 
-			# check for unphysical distance
+			# check for unphysical distance and reddening
 			if dist <= 0.0:
 				return -np.inf
 			if Av <= 0.0:
@@ -116,7 +156,7 @@ class likelihood(object):
 
 			# fit a parallax if given
 			if type(parallax) != type(None):
-				parallax_i = 1000.0/dist
+				parallax_i = 1000.0/modMIST['Dist']
 				lnlike += -0.5 * ((parallax[0]-parallax_i)**2.0)/(parallax[1]**2.0)
 
 			if type(inphot) != type(None):
@@ -127,15 +167,15 @@ class likelihood(object):
 				photpars['logg'] = modMIST['log(g)']
 				photpars['feh']  = modMIST['[Fe/H]']
 				photpars['logl'] = modMIST['log(L)']
-				photpars['av']   = Av
-				photpars['dist'] = dist
+				photpars['av']   = modMIST['Av']
+				photpars['dist'] = modMIST['Dist']
 
 				# create filter list and arrange photometry to this list
 				filterlist = inphot.keys()
 				inphotlist = [inphot[x] for x in filterlist]
 
 				# sed = self.ppsed.sed(filters=filterlist,**photpars)
-				sed = self.fppsed.sed(**photpars)
+				sed = self.ppsed.sed(**photpars)
 
 				for sed_i,inphot_i in zip(sed,inphotlist):
 					lnlike += -0.5 * ((sed_i-inphot_i[0])**2.0)/(inphot_i[1]**2.0)

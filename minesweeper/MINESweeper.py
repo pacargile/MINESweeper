@@ -59,7 +59,7 @@ class MINESweeper(object):
 		self.likelihood = likelihood
 
 		self.outfilepars = (
-			['EEP','initial_mass','initial_[Fe/H]','initial_[a/Fe]','log(Age)','Mass','Rad',
+			['EEP','initial_mass','initial_[Fe/H]','log(Age)','Mass','Rad',
 			'log(L)','Teff','[Fe/H]','log(g)']
 			)
 
@@ -103,6 +103,9 @@ class MINESweeper(object):
 		self.ageweight = kwargs.get('ageweight',True)
 		if self.ageweight:
 			self.outfilepars.append('Agewgt')
+
+		# set the type of interpolation
+		self.fastinterp = kwargs.get('fastinterp',True)
 
 		# init output file
 		self.output = kwargs.get('output','Test.dat')
@@ -162,7 +165,12 @@ class MINESweeper(object):
 		self.priorfn = self.priors(priordict)
 
 		# initialize the likelihood class
-		self.likefn = self.likelihood(datadict,MISTinfo,ageweight=self.ageweight,verbose=self.verbose)
+		self.likefn = self.likelihood(
+			datadict,
+			MISTinfo,
+			fastinterp=self.fastinterp,
+			ageweight=self.ageweight,
+			verbose=self.verbose)
 
 		# pick random point within grid as starting active points
 
@@ -221,7 +229,7 @@ class MINESweeper(object):
 			self.outff.write('{0} '.format(it))
 			# self.outff.write(' '.join([str(q) for q in vstar]))
 			# write parameters at iteration if not ValueError
-			if self.likefn.MIST_i != 'ValueError':
+			if type(self.likefn.MIST_i) != type(None):
 				for pp in self.outfilepars:
 					self.outff.write('{0} '.format(self.likefn.MIST_i[pp]))
 			else:

@@ -8,44 +8,71 @@ import h5py
 #except(ImportError):
 from scipy.spatial import cKDTree as KDTree
 
-rename = {# Input
-          "mini": "initial_mass",
-          "eep": "EEP",
-          "feh": "initial_[Fe/H]",
-          "afe": "initial_[a/Fe]",
-          # Output
-          "mass": "star_mass",
-          "feh_surf": "[Fe/H]",
-          "loga": "log_age",
-          "logt": "log_Teff",
-          "logg": "log_g",
-          "logl": "log_L",
-          "logr": "log_R"
-          }
+from numpy.lib import recfunctions
+import minesweeper
 
-rename_out = deepcopy(rename)
-rename_out["loga"] = "log(Age)"
-rename_out["mass"] = "Mass"
-rename_out["logr"] = "log(Rad)"
-rename_out["logl"] = "log(L)"
-rename_out["logt"] = "log(Teff)"
-rename_out["logg"] = "log(g)"
+# rename = {# Input
+#           "mass": "initial_mass",
+#           "eep": "EEP",
+#           "feh": "initial_[Fe/H]",
+#           "afe": "initial_[a/Fe]",
+#           # Output
+#           # "mass": "star_mass",
+#           "feh_surf": "[Fe/H]",
+#           "loga": "log_age",
+#           "logt": "log_Teff",
+#           "logg": "log_g",
+#           "logl": "log_L",
+#           "logr": "log_R"
+#           }
 
+# rename_out = deepcopy(rename)
+# rename_out["loga"] = "log(Age)"
+# rename_out["mass"] = "Mass"
+# rename_out["logr"] = "log(Rad)"
+# rename_out["logl"] = "log(L)"
+# rename_out["logt"] = "log(Teff)"
+# rename_out["logg"] = "log(g)"
+
+MISTrename = {
+    'log(Age)':'log_age',
+    'Mass':'star_mass',
+    'log(Rad)':'log_R',
+    'log(L)':'log_L',
+    'log(Teff)':'log_Teff',
+    'log(g)':'log_g',
+}
 
 class fastMISTgen(object):
 
 
-    def __init__(self, mistfile=None, labels=["mini", "eep", "feh"],
-                 predictions=["loga", "logl", "logt", "logg"]):
+    def __init__(self, **kwargs):
 
+        self.verbose = kwargs.get('verbose',True)
+
+        mistfile = kwargs.get('model',None)
         if mistfile is None:
             self.mistfile = minesweeper.__abspath__+'data/MIST/MIST_1.2_EEPtrk.h5'
         else:
             self.mistfile = mistfile
+
+        if self.verbose:
+            print('Using Model: {0}'.format(self.mistfile))
+
+        # turn on age weighting
+        self.ageweight = kwargs.get('ageweight',True)
         
-        self.labels = labels
-        self.predictions = predictions
+        self.labels = kwargs.get('labels',['EEP','initial_mass','initial_[Fe/H]'])
+        # list of output parametrs you want from MIST 
+        # in addition to EEP, init_mass, init_FeH
+        self.predictions = kwargs.get('predictions',
+            ['log(Age)','Mass','log(Rad)','log(L)',
+            'log(Teff)','[Fe/H]','log(g)'])
+        if type(self.predictions) == type(None):
+            self.predictions = (['log(Age)','Mass','log(Rad)',
+                'log(L)','log(Teff)','[Fe/H]','log(g)'])
         self.ndim = len(self.labels)
+        self.modpararr = self.labels+self.predictions
 
         self._strictness = 0.0
         self.null = np.zeros(len(self.predictions)) + np.nan
@@ -57,23 +84,48 @@ class fastMISTgen(object):
     def make_lib(self, misth5):
         """Convert the HDF5 input to ndarrays for labels and outputs.
         """
-        cols = [rename[p] for p in self.labels]
+        cols = self.labels
         self.libparams = np.concatenate([np.array(misth5[z])[cols] for z in misth5["index"]])
         self.libparams.dtype.names = tuple(self.labels)
 
-        cols = [rename[p] for p in self.predictions]
+        cols = [MISTrename[x] if x in MISTrename.keys() else x for x in self.predictions]
         self.output = [np.concatenate([misth5[z][p] for z in misth5["index"]])
                        for p in cols]
-        self.output = np.array(self.output).T
+        self.output = np.array(self.output)
 
-    def gemMIST(self, mini=1.0, eep=300, feh=0.0):
+        if self.ageweight:
+            if self.verbose:
+                print('... Fitting w/ equal Age weighting')
+            self.addagewgt()
+
+        self.output = self.output.T
+
+    def addagewgt(self):
+        age_ind = self.predictions.index("log(Age)")
+        age_wgtarr = np.zeros(len(self.libparams['EEP']))
+
+        for z in np.unique(self.libparams['initial_[Fe/H]']):
+            for m in np.unique(self.libparams['initial_mass']):
+                inds = (self.libparams["initial_mass"] == m) & (self.libparams["initial_[Fe/H]"] == z)
+                aa = self.output[:,inds][age_ind]
+                grad = np.gradient(10.0**(aa))
+                age_wgtarr[inds] = grad/np.sum(grad)
+                # self.output[:,inds][-1] = grad/np.sum(grad)
+                # print(self.output[:,inds][-1][0])
+
+        self.output = np.vstack((self.output,age_wgtarr))
+        self.predictions.append('Agewgt')
+        self.modpararr.append('Agewgt')
+
+    def getMIST(self, mass=1.0, eep=300, feh=0.0,**kwargs):
         """
         """
         try:
-            inds, wghts = self.weights(mini=mini, eep=eep, feh=feh)
-            return np.dot(wghts, self.output[inds, :])
+            inds, wghts = self.weights(mass=mass, eep=eep, feh=feh)
+            predpars = np.dot(wghts, self.output[inds, :])
+            return [eep,mass,feh]+list(predpars)
         except(ValueError):
-            return self.null
+            return None
 
     def lib_as_grid(self):
         """Convert the library parameters to pixel indices in each dimension,
@@ -118,8 +170,15 @@ class fastMISTgen(object):
         return inds + np.squeeze(find)
 
     def weights(self, **params):
+        # translate keys into MIST model names
+        params['EEP'] = params.pop('eep')
+        params['initial_[Fe/H]'] = params.pop('feh')
+        params['initial_mass'] = params.pop('mass')
+
         xtarg = self.params_to_grid(**params)
         inds = self.knearest_inds(xtarg)
+        if len(inds) == 0:
+            raise ValueError
         wghts = self.linear_weights(inds, xtarg)
         if wghts.sum() <= self._strictness:
             raise ValueError("Something is wrong with the weights")

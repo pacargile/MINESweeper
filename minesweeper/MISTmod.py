@@ -26,6 +26,30 @@ import minesweeper
 # 	removeind = -26
 # MISTFILE_DEFAULT = os.path.dirname(__file__[:removeind]+'data/MIST/')
 
+# the array of parameters stored in object. Not full eep track
+# due to memory concerns
+
+# inpararr = ([
+# 	'EEP','initial_mass','initial_[Fe/H]','initial_[a/Fe]',
+# 	'log_age','star_mass','log_R','log_L',
+# 	'log_Teff','[Fe/H]','log_g',
+# 	])
+# renameparr = ([
+# 	'EEP','initial_mass','initial_[Fe/H]','initial_[a/Fe]',
+# 	'log(Age)','Mass','log(Rad)','log(L)',
+# 	'log(Teff)','[Fe/H]','log(g)',
+# 	])
+
+# dictionary to translate par names to MIST names
+MISTrename = {
+	'log(Age)':'log_age',
+	'Mass':'star_mass',
+	'log(Rad)':'log_R',
+	'log(L)':'log_L',
+	'log(Teff)':'log_Teff',
+	'log(g)':'log_g',
+}
+
 class MISTgen(object):
 	"""
 	The basic class to geneate predicted parameters from the MIST models 
@@ -57,7 +81,20 @@ class MISTgen(object):
 
 		self.verbose = kwargs.get('verbose',True)
 
-		self.ageweight = kwargs.get('ageweight',False)
+		# turn on age weighting
+		self.ageweight = kwargs.get('ageweight',True)
+
+		# list of values you want to interpolate over
+		self.labels = kwargs.get('labels',['EEP','initial_mass','initial_[Fe/H]'])
+
+		# list of output parametrs you want from MIST 
+		# in addition to EEP, init_mass, init_FeH
+		self.predictions = kwargs.get('predictions',
+			['log(Age)','Mass','log(Rad)','log(L)',
+			'log(Teff)','[Fe/H]','log(g)'])
+		if type(self.predictions) == type(None):
+			self.predictions = (['log(Age)','Mass','log(Rad)',
+				'log(L)','log(Teff)','[Fe/H]','log(g)'])
 
 		if self.verbose:
 			print('Using Model: {0}'.format(self.mistfile))
@@ -66,42 +103,17 @@ class MISTgen(object):
 		misth5 = h5py.File(self.mistfile,'r')
 
 		# build MIST object to eventually stick into interpolator
-
-		# the array of parameters stored in object. Not full eep track
-		# due to memory concerns
-
-		inpararr = ([
-			'EEP','initial_mass','initial_[Fe/H]','initial_[a/Fe]',
-			'log_age','star_mass','log_R','log_L',
-			'log_Teff','[Fe/H]','log_g',
-			])
-		renameparr = ([
-			'EEP','initial_mass','initial_[Fe/H]','initial_[a/Fe]',
-			'log(Age)','Mass','log(Rad)','log(L)',
-			'log(Teff)','[Fe/H]','log(g)',
-			])
-
+		self.modpararr = self.labels+self.predictions
+		trans_modpararr = [MISTrename[x] if x in MISTrename.keys() else x for x in self.modpararr]
 		for kk in misth5['index']:
 			# read in MIST array
 			mist_i = np.array(misth5[kk])
-			mist_i = mist_i[inpararr]
+			mist_i = mist_i[trans_modpararr]
 
 			if kk == misth5['index'][0]:
 				self.mist = mist_i.copy()
 			else:
 				self.mist = np.concatenate([self.mist,mist_i])
-
-		# rename the fields to better column names
-		# self.mist = recfunctions.rename_fields(self.mist,
-		# 	{
-		# 	'log_age':'log(Age)',
-		# 	'star_mass':'Mass',
-		# 	'log_R':'log(Rad)',
-		# 	'log_L':'log(L)',
-		# 	'log_Teff':'log(Teff)',
-		# 	'log_g':'log(g)',
-		# 	})
-		self.mist.dtype.names = renameparr
 
 		if self.ageweight:
 			# determine a weighting scheme to equally weight mass tracks to 
@@ -115,9 +127,11 @@ class MISTgen(object):
 				ind_i = np.argwhere(
 					(self.mist['initial_mass'] == massfeh_i[0]) & (self.mist['initial_[Fe/H]'] == massfeh_i[1])
 					).flatten()
-				grad = np.gradient(10.0**(self.mist['log(Age)'][ind_i]))
+				grad = np.gradient(10.0**(self.mist[MISTrename['log(Age)']][ind_i]))
 				self.mist['Agewgt'][ind_i] = grad/np.sum(grad)
-			self.mist['Agewgt'] = self.mist['Agewgt']
+			# self.mist['Agewgt'] = self.mist['Agewgt']
+			self.predictions.append('Agewgt')
+			self.modpararr.append('Agewgt')
 
 		# build KD-Tree
 		if self.verbose:
@@ -151,20 +165,22 @@ class MISTgen(object):
 		self.dist = np.sqrt( (2.0**2.0) + (2.0**2.0) + (2.0**2.0) )
 
 		# create stacked array for interpolation
+		cols = [MISTrename[x] if x in MISTrename.keys() else x for x in self.predictions]
 		self.valuestack = np.stack(
-			[self.mist[kk] for kk in self.mist.dtype.names],
+			[self.mist[kk] for kk in cols],
 			axis=1)
 
-	def getMIST(self,pars,**kwargs):
+
+	def getMIST(self,eep=300,mass=1.0,feh=0.0,**kwargs):
 		if 'verbose' in kwargs:
 			verbose = kwargs['verbose']
 		else:
 			verbose = True
 
 		# unbind the input pars
-		eep = pars[0]
-		mass = pars[1]
-		feh = pars[2]
+		# eep = pars[0]
+		# mass = pars[1]
+		# feh = pars[2]
 
 		# check to make sure pars are within bounds of EEP tracks
 		if ((eep  > self.minmax['EEP'][1]) or 
@@ -176,20 +192,20 @@ class MISTgen(object):
 			):
 			if verbose:
 				print 'HIT MODEL BOUNDS'
-			return 'ValueError'
+			return None
 
 		# build output dictionary to handle everything
-		moddict = {}
+		outpred = []
 
 		# stick in input pars
-		moddict['EEP'] = eep
-		moddict['initial_mass'] = mass
-		moddict['initial_[Fe/H]'] = feh
+		outpred.append(eep)
+		outpred.append(mass)
+		outpred.append(feh)
 
-		# check to see if user is passing Dist and Av, if so stick it into moddict as well
-		if len(pars) > 3:
-			moddict['Dist'] = pars[3]
-			moddict['Av'] = pars[4]
+		# # check to see if user is passing Dist and Av, if so stick it into moddict as well
+		# if len(pars) > 3:
+		# 	moddict['Dist'] = pars[3]
+		# 	moddict['Av'] = pars[4]
 
 		ind_eep  = np.digitize(eep,bins=self.eep_uval,right=False)-1
 		ind_mass = np.digitize(mass,bins=self.mass_uval,right=False)-1
@@ -212,7 +228,7 @@ class MISTgen(object):
 			if len(np.unique(KDTpars[testkk])) < 2:
 				if verbose:
 					print('Not enough points in KD-Tree sample')
-				return 'ValueError'
+				return None
 
 		# do the linear N-D interpolation
 		try:
@@ -230,16 +246,25 @@ class MISTgen(object):
 					min(KDTpars['initial_[Fe/H]']),max(KDTpars['initial_[Fe/H]'])
 					)
 				print (eep,lage,feh)
-			return 'ValueError'
+			return None
 
-		# stick interpolated pars into moddict
-		for ii,pp in enumerate(KDTpars.dtype.names):
-			if dataint[ii] != np.nan_to_num(-np.inf):
-				if pp not in ['EEP','initial_mass','initial_[Fe/H]']:
-					moddict[pp] = dataint[ii]
+		# stick interpolated pars into outpred list
+		for dd in dataint:
+			if dd != np.nan_to_num(-np.inf):
+				outpred.append(dd)
 			else:
 				if verbose:
 					print('Tried to extrapolate')
-				return 'ValueError'
+				return None
 
-		return moddict
+		# # stick interpolated pars into moddict
+		# for ii,pp in enumerate(KDTpars.dtype.names):
+		# 	if dataint[ii] != np.nan_to_num(-np.inf):
+		# 		if pp not in ['EEP','initial_mass','initial_[Fe/H]']:
+		# 			moddict[pp] = dataint[ii]
+		# 	else:
+		# 		if verbose:
+		# 			print('Tried to extrapolate')
+		# 		return 'ValueError'
+
+		return outpred
