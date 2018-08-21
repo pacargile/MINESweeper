@@ -197,7 +197,12 @@ class MINESweeper(object):
 		samplemethod = samplerdict.get('samplemethod','unif')
 		delta_logz_final = samplerdict.get('delta_logz_final',0.01)
 		flushnum = samplerdict.get('flushnum',10)
-		maxiter = samplerdict.get('maxiter',sys.maxint)
+		try:
+			# Python 2.x
+			maxiter = samplerdict.get('maxiter',sys.maxint)
+		except AttributeError:
+			# Python 3.x
+			maxiter = samplerdict.get('maxiter',sys.maxsize)
 
 		if self.verbose:
 			print(
