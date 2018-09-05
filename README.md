@@ -24,7 +24,7 @@ Author
 -------
 * **Phillip Cargile** (Harvard)
 
-See [Authors](authors.rst) for a full list of contributors to MINESweeper.
+See [Authors](authors.md) for a full list of contributors to MINESweeper.
 
 Requirements
 -------
