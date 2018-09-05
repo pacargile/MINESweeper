@@ -1,7 +1,7 @@
 # MINESweeper
 =====
 
-**M**IST **I**sochrones with **N**ested **E**llipsoidal **S**ampling
+**M**IST **I**sochrones with **NE**sted **S**ampling
 
 Isochrone fitting code using latest mass-tracks from the MIST models.
 
