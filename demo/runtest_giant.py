@@ -127,9 +127,9 @@ datadict['phot']['WISE_W3']  = [-0.546512489014,0.01]
 datadict['phot']['WISE_W4']  = [-0.561262850456,0.01]
 
 datadict['sampler'] = {}
-datadict['sampler']['samplemethod'] = 'rwalk'
-datadict['sampler']['npoints'] = 50
-datadict['sampler']['samplertype'] = 'single'
+datadict['sampler']['samplemethod'] = 'slice'
+datadict['sampler']['npoints'] = 250
+datadict['sampler']['samplertype'] = 'multi'
 datadict['sampler']['flushnum'] = 100
 
 print('TEST MOCK STAR:')

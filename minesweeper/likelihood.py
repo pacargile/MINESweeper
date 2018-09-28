@@ -55,10 +55,12 @@ class likelihood(object):
 	def _initMIST(self,model=None,ageweight=True,fast=True,predictions=None,**kwargs):
 
 		if fast:
+			print('... Using Fast MIST interpolation')
 			from .fastMISTmod import fastMISTgen
 			return fastMISTgen(model=model,predictions=predictions,
 				ageweight=ageweight,verbose=self.verbose)
 		else:
+			print('... Using Scipy-based MIST interpolation')
 			# OLD SLOWER ANN BASED ON SCIPY INTERPOLATE
 			from .MISTmod import MISTgen
 			# init MISTgen

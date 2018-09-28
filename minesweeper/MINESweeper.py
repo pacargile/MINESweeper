@@ -194,7 +194,7 @@ class MINESweeper(object):
 		samplertype = samplerdict.get('samplertype','multi')
 		bootstrap = samplerdict.get('bootstrap',0)
 		update_interval = samplerdict.get('update_interval',0.6)
-		samplemethod = samplerdict.get('samplemethod','unif')
+		samplemethod = samplerdict.get('samplemethod','slice')
 		delta_logz_final = samplerdict.get('delta_logz_final',0.01)
 		flushnum = samplerdict.get('flushnum',10)
 		try:
@@ -221,6 +221,7 @@ class MINESweeper(object):
 			sample=samplemethod,
 			update_interval=update_interval,
 			bootstrap=bootstrap,
+			slices=200,
 			)
 
 

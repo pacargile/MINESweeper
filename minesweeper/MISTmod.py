@@ -135,7 +135,7 @@ class MISTgen(object):
 
 		# build KD-Tree
 		if self.verbose:
-			print 'Growing the KD-Tree...'
+			print('Growing the KD-Tree...')
 		# determine unique values in grid
 		self.eep_uval  = np.unique(self.mist['EEP'])
 		self.mass_uval = np.unique(self.mist['initial_mass'])
@@ -191,7 +191,7 @@ class MISTgen(object):
 			(feh  < self.minmax['FEH'][0])
 			):
 			if verbose:
-				print 'HIT MODEL BOUNDS'
+				print('HIT MODEL BOUNDS')
 			return None
 
 		# build output dictionary to handle everything
