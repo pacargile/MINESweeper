@@ -1,7 +1,7 @@
 # MINESweeper
 =====
 
-**M**IST **I**sochrones with **N**ested **E**llipsoidal **S**ampling
+**M**IST **I**sochrones with **NE**sted **S**ampling
 
 Isochrone fitting code using latest mass-tracks from the MIST models.
 
@@ -24,7 +24,7 @@ Author
 -------
 * **Phillip Cargile** (Harvard)
 
-See [Authors](authors.rst) for a full list of contributors to MINESweeper.
+See [Authors](AUTHORS.md) for a full list of contributors to MINESweeper.
 
 Requirements
 -------
