@@ -16,7 +16,7 @@ from scipy.spatial import cKDTree
 from scipy.interpolate import LinearNDInterpolator
 
 from numpy.lib import recfunctions
-import PayneSw
+import minesweeper
 
 # # define aliases for the MIST EEP tracks
 # currentpath = __file__
@@ -44,13 +44,13 @@ import PayneSw
 MISTrename = {
 	'log(Age)':'log_age',
 	'Mass':'star_mass',
-	'log(R)':'log_R',
+	'log(Rad)':'log_R',
 	'log(L)':'log_L',
 	'log(Teff)':'log_Teff',
 	'log(g)':'log_g',
 }
 
-class GenMIST(object):
+class MISTgen(object):
 	"""
 	The basic class to geneate predicted parameters from the MIST models 
 	from a set of EEP/initial_mass/initial_[Fe/H]/initial_[a/Fe] 
@@ -60,14 +60,14 @@ class GenMIST(object):
 
 	"""
 	def __init__(self,**kwargs):
-		super(GenMIST, self).__init__()
+		super(MISTgen, self).__init__()
 
 		# check for a user defined model
 		self.mistfile = kwargs.get('model',None)
 
 		# model = kwargs.get('model',None)
 		if self.mistfile == None:
-			self.mistfile = PayneSw.__abspath__+'data/MIST/MIST_1.2_EEPtrk.h5'
+			self.mistfile = minesweeper.__abspath__+'data/MIST/MIST_1.2_EEPtrk.h5'
 		# else:
 		# 	# define aliases for the MIST isochrones and C3K/CKC files
 		# 	currentpath = __file__
@@ -85,16 +85,16 @@ class GenMIST(object):
 		self.ageweight = kwargs.get('ageweight',True)
 
 		# list of values you want to interpolate over
-		self.labels = kwargs.get('labels',['EEP','initial_mass','initial_[Fe/H]','initial_[a/Fe]'])
+		self.labels = kwargs.get('labels',['EEP','initial_mass','initial_[Fe/H]'])
 
 		# list of output parametrs you want from MIST 
 		# in addition to EEP, init_mass, init_FeH
 		self.predictions = kwargs.get('predictions',
-			['log(Age)','Mass','log(R)','log(L)',
-			'log(Teff)','[Fe/H]','[a/Fe]','log(g)'])
+			['log(Age)','Mass','log(Rad)','log(L)',
+			'log(Teff)','[Fe/H]','log(g)'])
 		if type(self.predictions) == type(None):
-			self.predictions = (['log(Age)','Mass','log(R)',
-				'log(L)','log(Teff)','[Fe/H]','[a/Fe]','log(g)'])
+			self.predictions = (['log(Age)','Mass','log(Rad)',
+				'log(L)','log(Teff)','[Fe/H]','log(g)'])
 
 		if self.verbose:
 			print('Using Model: {0}'.format(self.mistfile))
@@ -121,11 +121,11 @@ class GenMIST(object):
 			if self.verbose:
 				print('... Fitting w/ equal Age weighting')
 			self.mist = recfunctions.rec_append_fields(base=self.mist,data=np.empty(len(self.mist)),names='Agewgt')
-			for massfehafe_i in np.array(
-				np.meshgrid(np.unique(self.mist['initial_mass']),np.unique(self.mist['initial_[Fe/H]']),np.unique(self.mist['initial_[a/Fe]']))
-				).T.reshape(-1,3):
+			for massfeh_i in np.array(
+				np.meshgrid(np.unique(self.mist['initial_mass']),np.unique(self.mist['initial_[Fe/H]']))
+				).T.reshape(-1,2):
 				ind_i = np.argwhere(
-					(self.mist['initial_mass'] == massfehafe_i[0]) & (self.mist['initial_[Fe/H]'] == massfehafe_i[1]) & (self.mist['initial_[a/Fe]'] == massfehafe_i[2])
+					(self.mist['initial_mass'] == massfeh_i[0]) & (self.mist['initial_[Fe/H]'] == massfeh_i[1])
 					).flatten()
 				grad = np.gradient(10.0**(self.mist[MISTrename['log(Age)']][ind_i]))
 				self.mist['Agewgt'][ind_i] = grad/np.sum(grad)
@@ -140,33 +140,29 @@ class GenMIST(object):
 		self.eep_uval  = np.unique(self.mist['EEP'])
 		self.mass_uval = np.unique(self.mist['initial_mass'])
 		self.feh_uval  = np.unique(self.mist['initial_[Fe/H]'])
-		self.afe_uval  = np.unique(self.mist['initial_[a/Fe]'])
 
 		# calculate min and max values for each of the sampled arrays
 		self.minmax = {}
 		self.minmax['EEP']  = [self.eep_uval.min(), self.eep_uval.max()]
 		self.minmax['MASS'] = [self.mass_uval.min(),self.mass_uval.max()]
 		self.minmax['FEH']  = [self.feh_uval.min(),self.feh_uval.max()]
-		self.minmax['AFE']  = [self.afe_uval.min(),self.afe_uval.max()]
 
 		# determine difference between unique values
 		self.eep_diff  = np.diff(self.eep_uval)
 		self.mass_diff = np.diff(self.mass_uval)
 		self.feh_diff  = np.diff(self.feh_uval)
-		self.afe_diff  = np.diff(self.afe_uval)
 
 		# determine which unique grid point each EEP point belongs to
 		self.eep_dig  = np.digitize(self.mist['EEP'],bins=self.eep_uval,right=True)
 		self.mass_dig = np.digitize(self.mist['initial_mass'],bins=self.mass_uval,right=True)
 		self.feh_dig  = np.digitize(self.mist['initial_[Fe/H]'],bins=self.feh_uval,right=True)
-		self.afe_dig  = np.digitize(self.mist['initial_[a/Fe]'],bins=self.afe_uval,right=True)
 
 		# combine digitized arrays
-		self.pts_n = np.array([self.eep_dig,self.mass_dig,self.feh_dig,self.afe_dig]).T
+		self.pts_n = np.array([self.eep_dig,self.mass_dig,self.feh_dig]).T
 
 		# build tree and set distance metric (2-pts)
 		self.tree = cKDTree(self.pts_n)
-		self.dist = np.sqrt( (2.0**2.0) + (2.0**2.0) + (2.0**2.0) + (2.0**2.0))
+		self.dist = np.sqrt( (2.0**2.0) + (2.0**2.0) + (2.0**2.0) )
 
 		# create stacked array for interpolation
 		cols = [MISTrename[x] if x in MISTrename.keys() else x for x in self.predictions]
@@ -175,7 +171,7 @@ class GenMIST(object):
 			axis=1)
 
 
-	def getMIST(self,eep=300,mass=1.0,feh=0.0,afe=0.0,**kwargs):
+	def getMIST(self,eep=300,mass=1.0,feh=0.0,**kwargs):
 		if 'verbose' in kwargs:
 			verbose = kwargs['verbose']
 		else:
@@ -192,9 +188,7 @@ class GenMIST(object):
 			(mass > self.minmax['MASS'][1]) or 
 			(mass < self.minmax['MASS'][0]) or 
 			(feh  > self.minmax['FEH'][1]) or
-			(feh  < self.minmax['FEH'][0]) or
-			(afe  > self.minmax['AFE'][1]) or
-			(afe  < self.minmax['AFE'][0])
+			(feh  < self.minmax['FEH'][0])
 			):
 			if verbose:
 				print('HIT MODEL BOUNDS')
@@ -207,7 +201,6 @@ class GenMIST(object):
 		outpred.append(eep)
 		outpred.append(mass)
 		outpred.append(feh)
-		outpred.append(afe)
 
 		# # check to see if user is passing Dist and Av, if so stick it into moddict as well
 		# if len(pars) > 3:
@@ -217,14 +210,12 @@ class GenMIST(object):
 		ind_eep  = np.digitize(eep,bins=self.eep_uval,right=False)-1
 		ind_mass = np.digitize(mass,bins=self.mass_uval,right=False)-1
 		ind_feh  = np.digitize(feh,bins=self.feh_uval,right=False)-1
-		ind_afe  = np.digitize(afe,bins=self.afe_uval,right=False)-1
 
 		find_eep  = ((eep-self.eep_uval[ind_eep])/self.eep_diff[ind_eep]) + ind_eep
 		find_mass = ((mass-self.mass_uval[ind_mass])/self.mass_diff[ind_mass]) + ind_mass
 		find_feh  = ((feh-self.feh_uval[ind_feh])/self.feh_diff[ind_feh]) + ind_feh
-		find_afe  = ((afe-self.afe_uval[ind_afe])/self.afe_diff[ind_afe]) + ind_afe
 
-		KDTind = self.tree.query_ball_point([find_eep,find_mass,find_feh,find_afe],self.dist,p=5)
+		KDTind = self.tree.query_ball_point([find_eep,find_mass,find_feh],self.dist,p=5)
 
 		# pull from the value stack
 		valuestack_i = self.valuestack[KDTind]
@@ -233,7 +224,7 @@ class GenMIST(object):
 		KDTpars = self.mist[KDTind]
 
 		# check to make sure there are at least two points in each dimension
-		for testkk in ['EEP','initial_mass','initial_[Fe/H]','initial_[a/Fe]']:
+		for testkk in ['EEP','initial_mass','initial_[Fe/H]']:
 			if len(np.unique(KDTpars[testkk])) < 2:
 				if verbose:
 					print('Not enough points in KD-Tree sample')
@@ -242,20 +233,19 @@ class GenMIST(object):
 		# do the linear N-D interpolation
 		try:
 			dataint = LinearNDInterpolator(
-					(KDTpars['EEP'],KDTpars['initial_mass'],KDTpars['initial_[Fe/H]'],KDTpars['initial_[a/Fe]']),
+					(KDTpars['EEP'],KDTpars['initial_mass'],KDTpars['initial_[Fe/H]']),
 					valuestack_i,
 					fill_value=np.nan_to_num(-np.inf),
 					rescale=True
-					)(eep,mass,feh,afe)
+					)(eep,mass,feh)
 		except:
 			if verbose:
 				print('Problem with linear inter of KD-Tree sample')
 				print(min(KDTpars['EEP']),max(KDTpars['EEP']),
 					min(KDTpars['initial_mass']),max(KDTpars['initial_mass']),
-					min(KDTpars['initial_[Fe/H]']),max(KDTpars['initial_[Fe/H]']),
-					min(KDTpars['initial_[a/Fe]']),max(KDTpars['initial_[a/Fe]'])
+					min(KDTpars['initial_[Fe/H]']),max(KDTpars['initial_[Fe/H]'])
 					)
-				print (eep,lage,feh,afe)
+				print (eep,lage,feh)
 			return None
 
 		# stick interpolated pars into outpred list

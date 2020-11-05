@@ -3,19 +3,23 @@
 
 **M**IST **I**sochrones with **NE**sted **S**ampling
 
-Isochrone fitting code using latest mass-tracks from the MIST models.
+Spectrophotometric fitting code using latest mass-tracks from the MIST models as priors.
 
 Version 2.0
 
-Model interpolation and nested-sampling inference of observed stellar SED and/or parameters using the latest MIST stellar evolution models. The code has the following functionality:
+Model interpolation and nested-sampling inference of observed stellar SED and/or spectra using the latest MIST stellar evolution models. The code has the following functionality:
 
 * Uses a quick and efficient nearest-neighbor look up to quickly do N-D linear interpolation of MIST mass-tracks.
 
-* Samples MIST models in natural parameter space (EEP,initial_[Fe/H],initial_mass).
+* Samples MIST models in natural parameter space (EEP, initial_mass, initial_[Fe/H], and  initial_[a/Fe]).
 
-* Allows for likelihood comparison of any parameter predicted in the MIST models.
+* Allows for likelihood comparison with predicted spectra and/or photometry from the latest set of C3K models.
 
-A write up for the MINESweeper code is in prep., however, information regarding the MIST models can be found in [Choi et al. (2016)](http://adsabs.harvard.edu/abs/2016ApJ...823..102C), and detailed information about how we interpolate stellar models is given in [Dotter (2016)](http://adsabs.harvard.edu/abs/2016ApJS..222....8D). MINESweeper has been used in various studies, including: [Rodriguez et al. (2017)](http://adsabs.harvard.edu/abs/2017AJ....153..256R) and [Dotter et al. (2017)](http://adsabs.harvard.edu/abs/2017ApJ...840...99D).
+* Flexible prior functions allows for the handling of observables (e.g., Gaia parallax), as well as any predicted parameter from the MIST models (e.g., 
+
+The MINESweeper code is described in detail in [Cargile et al. (2020)](https://ui.adsabs.harvard.edu/abs/2020ApJ...900...28C). Information regarding the MIST models can be found in [Choi et al. (2016)](http://adsabs.harvard.edu/abs/2016ApJ...823..102C), and detailed information about how we interpolate stellar models is given in [Dotter (2016)](http://adsabs.harvard.edu/abs/2016ApJS..222....8D). Information about the nested-sampler used in MINESweeper can be found in [Speagle (2020)](https://ui.adsabs.harvard.edu/abs/2020MNRAS.493.3132S). MINESweeper has been developed in collaboration with The Payne, see [Ting et al. (2019)](https://ui.adsabs.harvard.edu/abs/2019ApJ...879...69T/).
+
+MINESweeper has been used in various studies, a current list of references can be found here: [MINESweeper Refs](https://ui.adsabs.harvard.edu/abs/2020ApJ...900...28C/citations).
 
 The current version of the MINESweeper code is still under development. Anyone interested in using this version of the code, please first contact <pcargile@cfa.harvard.edu>.
 
@@ -29,7 +33,7 @@ See [Authors](AUTHORS.md) for a full list of contributors to MINESweeper.
 Requirements
 -------
 
-Currently, the code is only tested on Python 2.7.X. Use it with Python 3.X at your own risk.
+The code is being developed and tested with Python 3.X.
 
 Python modules:
 

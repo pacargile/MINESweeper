@@ -34,27 +34,25 @@ import minesweeper
 # rename_out["logt"] = "log(Teff)"
 # rename_out["logg"] = "log(g)"
 
-# dictionary to translate par names to MIST names
 MISTrename = {
     'log(Age)':'log_age',
     'Mass':'star_mass',
-    'log(R)':'log_R',
+    'log(Rad)':'log_R',
     'log(L)':'log_L',
     'log(Teff)':'log_Teff',
     'log(g)':'log_g',
 }
 
-class GenMIST(object):
+class fastMISTgen(object):
 
 
     def __init__(self, **kwargs):
 
         self.verbose = kwargs.get('verbose',True)
 
-        mistfile = kwargs.get('MISTpath',None)
+        mistfile = kwargs.get('model',None)
         if mistfile is None:
-            self.mistfile = minesweeper.__abspath__+'data/MIST/MIST_2.0_EEPtrk.h5'
-            # self.mistfile = 
+            self.mistfile = minesweeper.__abspath__+'data/MIST/MIST_1.2_EEPtrk.h5'
         else:
             self.mistfile = mistfile
 
@@ -64,22 +62,17 @@ class GenMIST(object):
         # turn on age weighting
         self.ageweight = kwargs.get('ageweight',True)
         
-        self.labels = kwargs.get('labels',['EEP','initial_mass','initial_[Fe/H]','initial_[a/Fe]'])
+        self.labels = kwargs.get('labels',['EEP','initial_mass','initial_[Fe/H]'])
         # list of output parametrs you want from MIST 
         # in addition to EEP, init_mass, init_FeH
         self.predictions = kwargs.get('predictions',
-            ['log(Age)','Mass','log(R)','log(L)',
-            'log(Teff)','[Fe/H]','[a/Fe]','log(g)'])
+            ['log(Age)','Mass','log(Rad)','log(L)',
+            'log(Teff)','[Fe/H]','log(g)'])
         if type(self.predictions) == type(None):
-            self.predictions = (['log(Age)','Mass','log(R)',
-                'log(L)','log(Teff)','[Fe/H]','[a/Fe]','log(g)'])
+            self.predictions = (['log(Age)','Mass','log(Rad)',
+                'log(L)','log(Teff)','[Fe/H]','log(g)'])
         self.ndim = len(self.labels)
         self.modpararr = self.labels+self.predictions
-
-        if self.ageweight:
-            print('... Fitting w/ equal Age weighting')
-            self.predictions.append('Agewgt')
-            self.modpararr.append('Agewgt')
 
         self._strictness = 0.0
         self.null = np.zeros(len(self.predictions)) + np.nan
@@ -100,50 +93,37 @@ class GenMIST(object):
                        for p in cols]
         self.output = np.array(self.output)
 
-        self.libparams['initial_mass']   = np.around(self.libparams['initial_mass'],decimals=2)
-        self.libparams['initial_[Fe/H]'] = np.around(self.libparams['initial_[Fe/H]'],decimals=2)
-        self.libparams['initial_[a/Fe]'] = np.around(self.libparams['initial_[a/Fe]'],decimals=2)
-
-        # if self.ageweight:
-        #     if self.verbose:
-        #         print('... Fitting w/ equal Age weighting')
-        #     self.addagewgt()
+        if self.ageweight:
+            if self.verbose:
+                print('... Fitting w/ equal Age weighting')
+            self.addagewgt()
 
         self.output = self.output.T
 
-    # def addagewgt(self):
-    #     # print('... Calculating Age Weighting')
-    #     # age_ind = self.predictions.index("log(Age)")
-    #     # age_wgtarr = np.zeros(len(self.libparams['EEP']))
+    def addagewgt(self):
+        age_ind = self.predictions.index("log(Age)")
+        age_wgtarr = np.zeros(len(self.libparams['EEP']))
 
-    #     # for z in np.unique(self.libparams['initial_[Fe/H]']):
-    #     #     for a in np.unique(self.libparams['initial_[a/Fe]']):
-    #     #         for m in np.unique(self.libparams['initial_mass']):
-    #     #             inds = (
-    #     #                 (self.libparams["initial_mass"] == m) & 
-    #     #                 (self.libparams["initial_[Fe/H]"] == z) & 
-    #     #                 (self.libparams["initial_[a/Fe]"] == a) 
-    #     #                 )
-    #     #             if inds.sum() > 1:
-    #     #                 aa = self.output[:,inds][age_ind]
-    #     #                 grad = np.gradient(aa)
-    #     #                 age_wgtarr[inds] = grad/np.sum(grad)
-    #     #                 # self.output[:,inds][-1] = grad/np.sum(grad)
-    #     #                 # print(self.output[:,inds][-1][0])
+        for z in np.unique(self.libparams['initial_[Fe/H]']):
+            for m in np.unique(self.libparams['initial_mass']):
+                inds = (self.libparams["initial_mass"] == m) & (self.libparams["initial_[Fe/H]"] == z)
+                aa = self.output[:,inds][age_ind]
+                grad = np.gradient(10.0**(aa))
+                age_wgtarr[inds] = grad/np.sum(grad)
+                # self.output[:,inds][-1] = grad/np.sum(grad)
+                # print(self.output[:,inds][-1][0])
 
-    #     # # check for zeros and replace with small value to keep from throwing errors
-    #     # cond = age_wgtarr < np.finfo(np.float).eps
-    #     # age_wgtarr[cond] = np.finfo(np.float).eps
+        self.output = np.vstack((self.output,age_wgtarr))
+        self.predictions.append('Agewgt')
+        self.modpararr.append('Agewgt')
 
-    #     self.output = np.vstack((self.output,age_wgtarr))
-
-    def getMIST(self, mass=1.0, eep=300, feh=0.0, afe=0.0, **kwargs):
+    def getMIST(self, mass=1.0, eep=300, feh=0.0,**kwargs):
         """
         """
         try:
-            inds, wghts = self.weights(mass=mass, eep=eep, feh=feh, afe=afe)
+            inds, wghts = self.weights(mass=mass, eep=eep, feh=feh)
             predpars = np.dot(wghts, self.output[inds, :])
-            return [eep,mass,feh,afe]+list(predpars)
+            return [eep,mass,feh]+list(predpars)
         except(ValueError):
             return None
 
@@ -192,9 +172,8 @@ class GenMIST(object):
     def weights(self, **params):
         # translate keys into MIST model names
         params['EEP'] = params.pop('eep')
-        params['initial_mass'] = params.pop('mass')
         params['initial_[Fe/H]'] = params.pop('feh')
-        params['initial_[a/Fe]'] = params.pop('afe')
+        params['initial_mass'] = params.pop('mass')
 
         xtarg = self.params_to_grid(**params)
         inds = self.knearest_inds(xtarg)

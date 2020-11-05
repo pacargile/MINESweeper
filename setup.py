@@ -15,7 +15,7 @@ except ImportError:
     
 setup(
     name="MINESweeper",
-    url="https://github.com/pacargile/MINESweeper",
+    url="https://github.com/pacargile/MINESweeper.git",
     version="2.0",
     author="Phillip Cargile",
     author_email="pcargile@cfa.harvard.edu",
@@ -25,15 +25,18 @@ setup(
     long_description=open("README.md").read(),
     package_data={"": ["README.md", "LICENSE"]},
     include_package_data=True,
-    install_requires=["numpy", "scipy", "dynesty", "torch", "h5py"],
+    install_requires=["numpy", "scipy", "dynesty", "torch"],
 )
 
 # write top level __init__.py file with the correct absolute path to package repo
 toplevelstr = ("""try:
     from ._version import __version__
 except(ImportError):
-    pass"""
+    pass
+
+"""
 )
+
 with open('minesweeper/__init__.py','w') as ff:
   ff.write(toplevelstr)
   ff.write('\n')

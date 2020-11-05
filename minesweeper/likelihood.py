@@ -1,251 +1,190 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 import numpy as np
-
-# dictionary to translate par names to MIST names
-MISTrename = {
-	'log_age':'log(Age)',
-	'star_mass':'Mass',
-	'log_R':'log(Rad)',
-	'log_L':'log(L)',
-	'log_Teff':'log(Teff)',
-	'log_g':'log(g)',
-}
+from .genmod import GenMod
+from .fastMISTmod import GenMIST
+from datetime import datetime
 
 class likelihood(object):
-	"""docstring for likelihood"""
-	def __init__(self,datadict,MISTinfo,**kwargs):
-		super(likelihood, self).__init__()
+     """docstring for likelihood"""
+     def __init__(self,fitargs,fitpars,runbools,**kwargs):
+          super(likelihood, self).__init__()
 
-		self.verbose = kwargs.get('verbose',True)
+          self.verbose = kwargs.get('verbose',True)
+          self.fitargs = fitargs
 
-		ageweight = kwargs.get('ageweight',False)
+          # split up the boolean flags
+          self.spec_bool = runbools[0]
+          self.phot_bool = runbools[1]
+          self.normspec_bool = runbools[2]
+          self.photscale_bool = runbools[3]
 
-		fastinterp = kwargs.get('fastinterp',True)
+          # run with weights such that d(EEP)/d(age) = constant
+          self.ageweight = self.fitargs['ageweight']
+          # array of parameters that are fixed
+          self.fixedpars = self.fitargs['fixedpars']
+          # turn on or off surface diffusion
+          self.dif_bool  = self.fitargs['mistdif']
 
-		self.predictions = kwargs.get('predictions',None)
+          # initialize the model generation class
+          self.GM = GenMod()
 
-		# the dictionary with all data for likelihood
-		self.datadict = datadict
+          # initialize the ANN for spec and phot if user defined
+          if self.spec_bool:
+               self.GM._initspecnn(nnpath=fitargs['specANNpath'],
+                    NNtype=self.fitargs['NNtype'])
+          if self.phot_bool:
+               self.GM._initphotnn(self.fitargs['obs_phot'].keys(),
+                    nnpath=fitargs['photANNpath'])
 
-		# init the MIST models
-		self.MISTgen = self._initMIST(
-			model=MISTinfo['model'],stripeindex=MISTinfo['stripe'],
-			ageweight=ageweight,fast=fastinterp,predictions=self.predictions)
+          if fitpars[1]['EEP']:
+               self.GMIST = GenMIST(MISTpath=self.fitargs['MISTpath'],
+                    ageweight=self.ageweight)
+               # self.GMIST._initMIST(ageweight=True,fast=False)
 
-		# if there is photometry, init the NN for those bands
-		if 'filterarray' in MISTinfo.keys():
-			self.ppsed = self._initSED(
-				filterarray=MISTinfo['filterarray'],nnpath=MISTinfo['nnpath'])
-		else:
-			self.ppsed = None
-
-	def _initSED(self,filterarray=None,nnpath=None, fast=True,**kwargs):
-
-		if fast:
-			from .predsed import FastPaynePredictor
-			# init Payne Photometry module
-			return FastPaynePredictor(usebands=filterarray,nnpath=nnpath)
-		else:
-			# OLD SLOWER ANN BASED ON PYTORCH
-			from .predsed import PaynePredictor
-			return PaynePredictor(usebands=filterarray,nnpath=nnpath)
-
-	def _initMIST(self,model=None,ageweight=True,fast=True,predictions=None,**kwargs):
-
-		if fast:
-			print('... Using Fast MIST interpolation')
-			from .fastMISTmod import fastMISTgen
-			return fastMISTgen(model=model,predictions=predictions,
-				ageweight=ageweight,verbose=self.verbose)
-		else:
-			print('... Using Scipy-based MIST interpolation')
-			# OLD SLOWER ANN BASED ON SCIPY INTERPOLATE
-			from .MISTmod import MISTgen
-			# init MISTgen
-			return MISTgen(
-				model=model,predictions=predictions,
-				ageweight=ageweight,verbose=self.verbose)
-
-		
-	def like(self,pars,returnarr=False):
-		# split pars into MIST and [Dist,Av]
-		eep = pars[0]
-		mass = pars[1]
-		FeH = pars[2]
-		mistpars = [eep,mass,FeH]
-
-		if len(pars) > 3:
-			dist = pars[3]
-			Av = pars[4]
-			photpars = [dist,Av]
-		else:
-			photpars = None
-
-		# run getMIST to pull model
-		MIST_i_arr = self.MISTgen.getMIST(eep=eep,mass=mass,feh=FeH,verbose=False)
-
-		if type(MIST_i_arr) == type(None):
-			return -np.inf
-
-		# stick MIST model pars into useful dict format
-		self.MIST_i = ({
-			kk:pp for kk,pp in zip(
-				self.MISTgen.modpararr,MIST_i_arr)
-			})			
-
-		for kk in self.MIST_i.keys():
-			if kk in MISTrename.keys():
-				self.MIST_i[MISTrename[kk]] = self.MIST_i.pop(kk)
-
-		if 'log(Teff)' in self.MIST_i.keys():
-			self.MIST_i['Teff'] = 10.0**self.MIST_i['log(Teff)']
-		if 'log(Rad)' in self.MIST_i.keys():
-			self.MIST_i['Rad']  = 10.0**self.MIST_i['log(Rad)']
-
-		if type(photpars) != type(None):
-			self.MIST_i['Av'] = Av
-			self.MIST_i['Dist'] = dist
+          # determine the number of dims
+          self.ndim = 0
+          self.fitpars_i = []
+          for pp in fitpars[0]:
+               if fitpars[1][pp]:
+                    self.fitpars_i.append(pp)
+                    self.ndim += 1
 
 
-		if returnarr:
-			return self.calclikearray(self.MIST_i,photpars)
-		else:
-			return self.calclike(self.MIST_i,photpars)
+          # dictionary to translate par names to MIST names
+          self.MISTrename = {
+               'log_age':'log(Age)',
+               'star_mass':'Mass',
+               'log_R':'log(R)',
+               'log_L':'log(L)',
+               'log_Teff':'log(Teff)',
+               'log_g':'log(g)',}
+
+     def lnlikefn(self,pars):
+
+          # build the parameter dictionary
+          self.parsdict = {pp:vv for pp,vv in zip(self.fitpars_i,pars)} 
+
+          # add fixed parameters to parsdict
+          for kk in self.fixedpars.keys():
+               self.parsdict[kk] = self.fixedpars[kk]
+          
+          # first check to see if EEP is in pars, if so query 
+          # isochrones for stellar parameters
+          if 'EEP' in self.parsdict.keys():
+               MISTpred = self.GMIST.getMIST(
+                    eep=self.parsdict['EEP'],
+                    mass=self.parsdict['initial_Mass'],
+                    feh=self.parsdict['initial_[Fe/H]'],
+                    afe=self.parsdict['initial_[a/Fe]'],
+                    verbose=False,
+                    )
+               if type(MISTpred) == type(None):
+                    self.parsdict['Teff']   = np.inf
+                    self.parsdict['log(g)'] = np.inf
+                    self.parsdict['[Fe/H]'] = np.inf
+                    self.parsdict['[a/Fe]'] = np.inf
+                    self.parsdict['log(R)'] = np.inf
+
+                    # add other paramters just for fun
+                    self.parsdict['log(Age)'] = np.inf
+                    self.parsdict['Agewgt']   = np.inf
+                    self.parsdict['Mass']     = np.inf
+                    self.parsdict['log(L)']   = np.inf
+                    return -np.inf
+
+               # stick MIST model pars into useful dict format
+               MISTdict = ({
+                    kk:pp for kk,pp in zip(
+                         self.GMIST.modpararr,MISTpred)
+                    })
+               for kk in MISTdict.keys():
+                    if kk in self.MISTrename.keys():
+                         MISTdict[self.MISTrename[kk]] = MISTdict.pop(kk)
+
+               self.parsdict['Teff']   = 10.0**MISTdict['log(Teff)']
+               self.parsdict['log(g)'] = MISTdict['log(g)']
+               self.parsdict['log(R)'] = MISTdict['log(R)']
 
 
-	def calclike(self,modMIST,photpars):
-		# create input arrays
-		inpars = self.datadict.get('pars',None)
-		inphot = self.datadict.get('phot',None)
-		inspec = self.datadict.get('spec',None)
+               # use MIST predictions for surface abundances if asked for
+               if self.dif_bool:
+                    self.parsdict['[Fe/H]'] = MISTdict['[Fe/H]']
+                    self.parsdict['[a/Fe]'] = MISTdict['[a/Fe]']
+               else:
+                    self.parsdict['[Fe/H]'] = MISTdict['initial_[Fe/H]']
+                    self.parsdict['[a/Fe]'] = MISTdict['initial_[a/Fe]']
 
-		# init lnlike
-		lnlike = 0.0
+               # add other paramters just for fun
+               self.parsdict['EEP'] = MISTdict['EEP']
+               self.parsdict['log(Age)'] = MISTdict['log(Age)']
+               self.parsdict['Mass'] = MISTdict['Mass']
+               self.parsdict['log(L)'] = MISTdict['log(L)']
 
-		# set a default parallax
-		parallax = None
+               if self.ageweight:
+                    self.parsdict['Agewgt'] = MISTdict['Agewgt']
 
-		if 'Agewgt' in modMIST.keys():
-			lnlike += np.log(modMIST['Agewgt'])
+          if self.spec_bool:
+               specpars = ([
+                    self.parsdict[pp] 
+                    if (pp in self.parsdict.keys()) else np.nan
+                    for pp in ['Teff','log(g)','[Fe/H]','[a/Fe]','Vrad','Vrot','Vmic','Inst_R'] 
+                    ])
+               if self.normspec_bool:
+                    specpars = specpars + [self.parsdict[pp] for pp in self.fitpars_i if 'pc' in pp]
+          else:
+               specpars = None
 
-		# place a likelihood prob on star's age being within a 
-		# rough estimate of a Hubble time ~16 Gyr
-		if modMIST['log(Age)'] > 10.2:
-			return -np.inf
+          if self.phot_bool:
+               photpars = [self.parsdict[pp] for pp in ['Teff','log(g)','[Fe/H]','[a/Fe]']]
+               if 'log(A)' in self.fitpars_i:
+                    photpars = photpars + [self.parsdict['log(A)']]
+               else:
+                    photpars = photpars + [self.parsdict['log(R)'],self.parsdict['Dist']]
+               photpars = photpars + [self.parsdict['Av']]
+          else:
+               photpars = None
 
-		# check to see if there are any pars to fit
-		if type(inpars) != type(None):
-			for pp in inpars.keys():
-				if pp in modMIST.keys():
-					lnlike += -0.5 * ((inpars[pp][0]-modMIST[pp])**2.0)/(inpars[pp][1]**2.0)
+          # calculate likelihood probability
+          lnlike_i = self.lnlike(specpars=specpars,photpars=photpars)
 
-				# check if parallax is given, if so store it for the photometric step
-				if pp == 'Para':
-					parallax = inpars['Para']
+          # add the prior on Agewgt
+          if self.ageweight:
+               lnlike_i += np.log(self.parsdict['Agewgt'])
 
-		# check to see if dist and Av are passed, if so fit the photometry
-		if type(photpars) != type(None):
-			dist = photpars[0]
-			Av = photpars[1]
+          if lnlike_i == np.nan:
+               print(pars,lnlike_i)
 
-			# check for unphysical distance and reddening
-			if dist <= 0.0:
-				return -np.inf
-			if Av <= 0.0:
-				return -np.inf
+          return lnlike_i
 
-			# fit a parallax if given
-			if type(parallax) != type(None):
-				parallax_i = 1000.0/modMIST['Dist']
-				lnlike += -0.5 * ((parallax[0]-parallax_i)**2.0)/(parallax[1]**2.0)
+     def lnlike(self,specpars=None,photpars=None):
 
-			if type(inphot) != type(None):
+          if self.spec_bool:
+               # generate model spectrum
+               specmod = self.GM.genspec(specpars,outwave=self.fitargs['obs_wave_fit'],normspec_bool=self.normspec_bool)
+               modwave_i,modflux_i = specmod
 
-				# create parameter dictionary
-				photpars = {}
-				photpars['logt'] = modMIST['log(Teff)']
-				photpars['logg'] = modMIST['log(g)']
-				photpars['feh']  = modMIST['[Fe/H]']
-				photpars['logl'] = modMIST['log(L)']
-				photpars['av']   = modMIST['Av']
-				photpars['dist'] = modMIST['Dist']
+               # calc chi-square for spec
+               specchi2 = np.sum( 
+                    [((m-o)**2.0)/(s**2.0) for m,o,s in zip(
+                         modflux_i,self.fitargs['obs_flux_fit'],self.fitargs['obs_eflux_fit'])])
+          else:
+               specchi2 = 0.0
 
-				# create filter list and arrange photometry to this list
-				filterlist = inphot.keys()
-				inphotlist = [inphot[x] for x in filterlist]
+          if self.phot_bool:
+               # generate model SED
+               if self.photscale_bool:
+                    sedmod  = self.GM.genphot_scaled(photpars)
+               else:
+                    sedmod  = self.GM.genphot(photpars)
 
-				# sed = self.ppsed.sed(filters=filterlist,**photpars)
-				sed = self.ppsed.sed(**photpars)
+               # calculate chi-square for SED
+               sedchi2 = np.sum(
+                    [((sedmod[kk]-self.fitargs['obs_phot'][kk][0])**2.0)/(self.fitargs['obs_phot'][kk][1]**2.0) 
+                    for kk in self.fitargs['obs_phot'].keys()]
+                    )
+          else:
+               sedchi2 = 0.0
 
-				for sed_i,inphot_i in zip(sed,inphotlist):
-					lnlike += -0.5 * ((sed_i-inphot_i[0])**2.0)/(inphot_i[1]**2.0)
+          # print('LnL:',specpars,photpars,-0.5*(specchi2+sedchi2))
 
-		return lnlike
-
-	def calclikearray(self,modMIST,photpars):
-		# define a likelihood function that returns an array of -0.5*chi-square values for 
-		# input data. Useful when using optimizers.
-
-		# create input arrays
-		inpars = self.datadict.get('pars',None)
-		inphot = self.datadict.get('phot',None)
-		inspec = self.datadict.get('spec',None)
-
-		lnlike = []
-		parallax = None
-
-		# have to define the keys in these dictionaries so that the order is standardized
-		if type(inpars) != type(None):
-			inpars_keys = inpars.keys()
-			inpars_keys.sort()
-		else:
-			inpars_keys = []
-
-		if type(inphot) != type(None):
-			inphot_keys = inphot.keys()
-			inphot_keys.sort()
-		else:
-			inphot_keys = []
-
-		# check to see if there are any pars to fit
-		if type(inpars) != type(None):
-			for pp in inpars_keys:
-				if pp in modMIST.keys():
-					# lnlike.append(-0.5 * ((inpars[pp][0]-modMIST[pp])**2.0)/(inpars[pp][1]**2.0))
-					lnlike.append(((inpars[pp][0]-modMIST[pp])/inpars[pp][1])**2.0)
-
-				# check if parallax is given, if so store it for the photometric step
-				if pp == 'Para':
-					parallax = inpars['Para']
-
-		# check to see if dist and Av are passed, if so fit the photometry
-		if type(photpars) != type(None):
-			dist = photpars[0]
-			Av = photpars[1]
-
-			# fit a parallax if given
-			if type(parallax) != type(None):
-				parallax_i = 1000.0/dist
-				# lnlike.append(-0.5 * ((parallax[0]-parallax_i)**2.0)/(parallax[1]**2.0))
-				lnlike.append(((parallax[0]-parallax_i)/parallax[1])**2.0)
-
-			if type(inphot) != type(None):
-
-				# define some parameters from modMIST for the photomteric predictions
-				Teff = 10.0**modMIST['log(Teff)']
-				FeH  = modMIST['[Fe/H]']
-				logg = modMIST['log(g)']
-
-				# calc bolometric magnitude
-				Mbol = -2.5*modMIST['log(L)']+4.74
-
-				# for each filter, calculate predicted mag and calc likelihood
-				for kk in inphot_keys:
-					BC_i = float(self.ANNfn[kk].eval([Teff,logg,FeH,Av]))
-					modphot = (Mbol - BC_i) + 5.0*np.log10(dist) - 5.0
-					# lnlike.append(-0.5 * ((modphot-inphot[kk][0])**2.0)/(inphot[kk][1]**2.0))
-					lnlike.append(((modphot-inphot[kk][0])/inphot[kk][1])**2.0)
-		return lnlike
-
+          # return ln(like) = -0.5 * chi-square
+          return -0.5*(specchi2+sedchi2)
