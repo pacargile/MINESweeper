@@ -159,11 +159,13 @@ class likelihood(object):
 
           if self.spec_bool:
                # generate model spectrum
+
+               print('specpars',specpars)
                specmod = self.GM.genspec(specpars,outwave=self.fitargs['obs_wave_fit'],normspec_bool=self.normspec_bool)
                modwave_i,modflux_i = specmod
 
-               print(modwave_i)
-               print(modflux_i)
+               print('wave',modwave_i)
+               print('flux',modflux_i)
 
                # calc chi-square for spec
                specchi2 = np.sum( 
