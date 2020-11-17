@@ -1,7 +1,7 @@
 # #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import numpy as np
+import jax.numpy as np
 from datetime import datetime
 
 from .fitutils import polycalc
@@ -20,10 +20,7 @@ class GenMod(object):
           #      YST = False
 
           from .fitutils import polycalc
-          if NNtype == 'PC':
-               from Payne.predict.predictspec_multi import PayneSpecPredict
-          else:
-               from Payne.predict.ystpred import PayneSpecPredict
+          from Payne.jax.predictspec import PayneSpecPredict
 
           # initialize the Payne Spectrum Predictor
           self.PP = PayneSpecPredict(nnpath)
@@ -31,7 +28,7 @@ class GenMod(object):
      def _initphotnn(self,filterarray,nnpath=None):
           self.filterarray = filterarray
 
-          from Payne.predict.predictsed import FastPayneSEDPredict
+          from Payne.jax.predictsed import FastPayneSEDPredict
           self.fppsed = FastPayneSEDPredict(
                usebands=self.filterarray,nnpath=nnpath,
                )
@@ -68,7 +65,7 @@ class GenMod(object):
           # predict model flux at model wavelengths
           modwave_i,modflux_i = self.PP.getspec(
                Teff=Teff,logg=logg,feh=FeH,afe=aFe,rad_vel=radvel,rot_vel=rotvel,vmic=vmic,inst_R=2.355*inst_R,
-               outwave=outwave)
+               outwave=outwave)         
           # if polynomial normalization is turned on then multiply model by it
           if normspec_bool:
                poly = polycalc(polycoef,outwave)

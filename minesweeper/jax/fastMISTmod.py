@@ -1,12 +1,20 @@
 from copy import deepcopy
 from itertools import product
 import time, sys
-import numpy as np
+import numpy as nnp
+import jax.numpy as np
 import h5py
+from datetime import datetime
 #try:
 #    from sklearn.neighbors import KDTree
 #except(ImportError):
-from scipy.spatial import KDTree as KDTree
+
+# from  scipy.spatial import cKDTree as KDTree
+# from  scipy.spatial import KDTree
+# from .kdtree import KDTree
+from .kdtree2 import KDTree
+
+import pickle
 
 from numpy.lib import recfunctions
 import minesweeper
@@ -92,17 +100,17 @@ class GenMIST(object):
         """Convert the HDF5 input to ndarrays for labels and outputs.
         """
         cols = self.labels
-        self.libparams = np.concatenate([np.array(misth5[z])[cols] for z in misth5["index"]])
+        self.libparams = nnp.concatenate([nnp.array(misth5[z])[cols] for z in misth5["index"]])
         self.libparams.dtype.names = tuple(self.labels)
 
         cols = [MISTrename[x] if x in MISTrename.keys() else x for x in self.predictions]
-        self.output = [np.concatenate([misth5[z][p] for z in misth5["index"]])
+        self.output = [nnp.concatenate([misth5[z][p] for z in misth5["index"]])
                        for p in cols]
-        self.output = np.array(self.output)
+        self.output = nnp.array(self.output)
 
-        self.libparams['initial_mass']   = np.around(self.libparams['initial_mass'],decimals=2)
-        self.libparams['initial_[Fe/H]'] = np.around(self.libparams['initial_[Fe/H]'],decimals=2)
-        self.libparams['initial_[a/Fe]'] = np.around(self.libparams['initial_[a/Fe]'],decimals=2)
+        self.libparams['initial_mass']   = nnp.around(self.libparams['initial_mass'],decimals=2)
+        self.libparams['initial_[Fe/H]'] = nnp.around(self.libparams['initial_[Fe/H]'],decimals=2)
+        self.libparams['initial_[a/Fe]'] = nnp.around(self.libparams['initial_[a/Fe]'],decimals=2)
 
         # if self.ageweight:
         #     if self.verbose:
@@ -162,7 +170,13 @@ class GenMIST(object):
                                   right=True) for p in self.labels])
         self.X = X.T
         # Build the KDTree
-        self._kdt = KDTree(self.X)  # , metric='euclidean')
+        startime = datetime.now()
+        self._kdt = KDTree(self.X,leafsize=1000)  # , metric='euclidean')
+        print('built KDTree: {}'.format(datetime.now()-startime))
+        # self._kdt = pickle.load(
+        #     open('/Users/pcargile/Astro/MINESweeper/JAX/MISTKDTree.p','rb')
+        #     )
+
 
     def params_to_grid(self, **targ):
         """Convert a set of parameters to grid pixel coordinates.
@@ -180,8 +194,8 @@ class GenMIST(object):
         inds = np.squeeze(inds)
         # Get fractional index.
         try:
-            find = [(targ[p] - self.gridpoints[p][i]) / self.binwidths[p][i]
-                    for i, p in zip(inds, self.labels)]
+            find = np.asarray([(targ[p] - self.gridpoints[p][i]) / self.binwidths[p][i]
+                    for i, p in zip(inds, self.labels)])
         except(IndexError):
             pstring = "{0}: min={2} max={3} targ={1}\n"
             s = [pstring.format(p, targ[p], *self.gridpoints[p][[0, -1]])
@@ -223,12 +237,13 @@ class GenMIST(object):
         """
         # Query the tree within radius sqrt(ndim)
         #try:
-        #    inds = self._kdt.query_radius(xtarg.reshape(1, -1),
-        #                                  r=np.sqrt(self.ndim))
+        # inds = self._kdt.query_radius(xtarg.reshape(1, -1),
+            # r=np.sqrt(self.ndim))
         #except(AttributeError):
         inds = self._kdt.query_ball_point(xtarg.reshape(1, -1),
                                           np.sqrt(self.ndim))
-        return np.sort(inds[0])
+        inds = np.asarray(inds)
+        return np.sort(inds)
 
     def linear_weights(self, knearest, xtarg):
         """Use ND-linear interpolation over the knearest neighbors.

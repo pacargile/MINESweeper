@@ -16,7 +16,7 @@ from scipy.spatial import cKDTree
 from scipy.interpolate import LinearNDInterpolator
 
 from numpy.lib import recfunctions
-import minesweeper
+import PayneSw
 
 # # define aliases for the MIST EEP tracks
 # currentpath = __file__

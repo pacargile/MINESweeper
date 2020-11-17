@@ -161,7 +161,7 @@ class likelihood(object):
                # generate model spectrum
                specmod = self.GM.genspec(specpars,outwave=self.fitargs['obs_wave_fit'],normspec_bool=self.normspec_bool)
                modwave_i,modflux_i = specmod
-               
+
                # calc chi-square for spec
                specchi2 = np.sum( 
                     [((m-o)**2.0)/(s**2.0) for m,o,s in zip(

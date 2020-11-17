@@ -52,9 +52,5 @@ docs/examples
 # old files
 old/*
 
-# test directory
-demo/*.dat
-
 # data directory
-data/MIST/*h5
-data/nnMIST/*h5
+data

@@ -1,0 +1,60 @@
+filter phot err
+2MASS_J      4.667 0.260
+2MASS_H      4.162 0.178
+2MASS_Ks     4.186 0.292
+#
+Bessell_B    nan nan
+Bessell_I    nan nan
+Bessell_R    nan nan
+Bessell_U    nan nan
+Bessell_V    nan nan
+#
+DECam_Y      nan nan
+DECam_g      nan nan
+DECam_i      nan nan
+DECam_r      nan nan
+DECam_u      nan nan
+DECam_z      nan nan
+#
+GaiaDR2_BP   nan nan
+GaiaDR2_G    nan nan
+GaiaDR2_RP   nan nan
+GaiaMAW_BPb  5.6745 0.0023
+GaiaMAW_BPf  nan nan
+GaiaMAW_G    5.3026 0.0018
+GaiaMAW_RP   4.8664 0.0035
+#
+Hipparcos_Hp nan nan
+#
+Kepler_D51   nan nan
+Kepler_Kp    nan nan
+#
+PS_g         nan nan
+PS_i         nan nan
+PS_open      nan nan
+PS_r         nan nan
+PS_w         nan nan
+PS_y         nan nan
+PS_z         nan nan
+#
+SDSS_g       nan nan
+SDSS_i       nan nan
+SDSS_r       nan nan
+SDSS_u       nan nan
+SDSS_z       nan nan
+#
+TESS         nan nan
+#
+Tycho_B      nan nan
+Tycho_V      nan nan
+#
+UKIDSS_H     nan nan
+UKIDSS_J     nan nan
+UKIDSS_K     nan nan
+UKIDSS_Y     nan nan
+UKIDSS_Z     nan nan
+#
+WISE_W1      3.988 0.234
+WISE_W2      3.642 0.173
+WISE_W3      3.994 0.013
+WISE_W4      3.956 0.024

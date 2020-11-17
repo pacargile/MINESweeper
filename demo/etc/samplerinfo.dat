@@ -1,0 +1,10 @@
+parameter        setting
+samplertype      Static
+samplemethod     rwalk
+npoints          100
+samplerbounds    multi
+flushnum         1
+delta_logz_final 0.01
+walks            5
+maxcall          100000
+maxiter          10000

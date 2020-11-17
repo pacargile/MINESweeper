@@ -8,8 +8,8 @@ import dynesty
 
 from .fitutils import airtovacuum
 
-class FitMS(object):
-     """docstring for FitMS"""
+class FitPayne(object):
+     """docstring for FitPayne"""
      def __init__(self,**kwargs):
           from .likelihood import likelihood
           from .prior import prior
@@ -294,16 +294,6 @@ class FitMS(object):
                # Python 3.x
                maxiter = samplerdict.get('maxiter',sys.maxsize)
 
-          try:
-               # Python 2.x
-               maxcall = samplerdict.get('maxcall',sys.maxint)
-          except AttributeError:
-               # Python 3.x
-               maxcall = samplerdict.get('maxcall',sys.maxsize)
-
-          n_effective = samplerdict.get('n_effective',np.inf)
-
-
           if samplemethod == 'rwalk':
                numws = numwalks
           elif samplemethod == 'slice':
@@ -316,7 +306,6 @@ class FitMS(object):
                print(
                     'Static Dynesty w/ {0} sampler, {1} walks/slices, {2} number of samples, Ndim = {3}, and w/ stopping criteria of dlog(z) = {4}: {5}'.format(
                          samplemethod,numws,npoints,self.ndim,delta_logz_final,starttime))
-               print('Max Iter: {0} / Max Call: {1}'.format(maxiter,maxcall))
           sys.stdout.flush()
 
           # initialize sampler object
@@ -348,11 +337,7 @@ class FitMS(object):
 
           # start sampling
           print('Start Sampling @ {}'.format(iter_starttime))
-          for it, results in enumerate(dy_sampler.sample(
-               dlogz=delta_logz_final,
-               maxiter=maxiter,
-               maxcall=maxcall,
-               )):
+          for it, results in enumerate(dy_sampler.sample(dlogz=delta_logz_final)):
                (worst, ustar, vstar, loglstar, logvol, logwt, logz, logzvar,
                     h, nc, worst_it, propidx, propiter, eff, delta_logz) = results             
 
@@ -648,7 +633,7 @@ class FitMS(object):
 def lnprobfn(pars,likeobj,priorobj):
 
      lnlike = likeobj.lnlikefn(pars)
-     
+
      if lnlike == -np.inf:
           return -np.inf
 

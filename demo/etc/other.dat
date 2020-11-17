@@ -1,0 +1,14 @@
+parameter value err
+Parallax 70.7675 0.1119 
+Teff     5810 100.0     
+log(g)   4.44 0.25      
+[Fe/H]   0.01 0.25      
+[Ti/H]   0.05 0.25      
+[Ni/H]   0.04 0.25      
+Vmic     1.07 0.50      
+Vmac     4.06 0.50
+Vsini    2.2  0.50
+Vstellar 4.62 0.50
+Mass     1.02 0.06
+log(L)   0.02 0.02
+log(Age) 9.60 0.00
