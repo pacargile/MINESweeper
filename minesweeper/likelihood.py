@@ -160,8 +160,6 @@ class likelihood(object):
           if self.spec_bool:
                # generate model spectrum
 
-               print('specpars',specpars)
-               print(self.fitargs['obs_wave_fit'])
                specmod = self.GM.genspec(specpars,outwave=self.fitargs['obs_wave_fit'],normspec_bool=self.normspec_bool)
                modwave_i,modflux_i = specmod
                
