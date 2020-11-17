@@ -69,6 +69,10 @@ class GenMod(object):
           modwave_i,modflux_i = self.PP.getspec(
                Teff=Teff,logg=logg,feh=FeH,afe=aFe,rad_vel=radvel,rot_vel=rotvel,vmic=vmic,inst_R=2.355*inst_R,
                outwave=outwave)
+
+          print(modwave_i)
+          print(modflux_i)
+          
           # if polynomial normalization is turned on then multiply model by it
           if normspec_bool:
                poly = polycalc(polycoef,outwave)
