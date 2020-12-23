@@ -649,6 +649,9 @@ def lnprobfn(pars,likeobj,priorobj):
 
      lnlike = likeobj.lnlikefn(pars)
      
+     print(pars)
+     print(lnlike)
+     
      if lnlike == -np.inf:
           return -np.inf
 
