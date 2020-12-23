@@ -649,7 +649,7 @@ def lnprobfn(pars,likeobj,priorobj):
 
      lnlike = likeobj.lnlikefn(pars)
      
-     print(pars)
+     print(likeobj.parsdict)
      print(lnlike)
      sys.stdout.flush()
      if lnlike == -np.inf:
