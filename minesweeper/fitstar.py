@@ -651,7 +651,7 @@ def lnprobfn(pars,likeobj,priorobj):
      
      print(pars)
      print(lnlike)
-     
+     sys.stdout.flush()
      if lnlike == -np.inf:
           return -np.inf
 
