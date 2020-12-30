@@ -77,7 +77,7 @@ class GenMIST(object):
         self.modpararr = self.labels+self.predictions
 
         if self.ageweight:
-            print('... Fitting w/ equal Age weighting')
+            # print('... Fitting w/ equal Age weighting')
             self.predictions.append('Agewgt')
             self.modpararr.append('Agewgt')
 
@@ -87,6 +87,13 @@ class GenMIST(object):
         with h5py.File(self.mistfile, "r") as misth5:
             self.make_lib(misth5)
         self.lib_as_grid()
+
+        searchrad = 1.0
+        self.dist = np.sqrt( 
+            (searchrad**2.0) + 
+            (searchrad**2.0) + 
+            (searchrad**2.0) + 
+            (searchrad**2.0))
 
     def make_lib(self, misth5):
         """Convert the HDF5 input to ndarrays for labels and outputs.
@@ -202,7 +209,7 @@ class GenMIST(object):
             raise ValueError
         wghts = self.linear_weights(inds, xtarg)
         if wghts.sum() <= self._strictness:
-            raise ValueError("Something is wrong with the weights")
+            raise ValueError("Something is wrong with the weights, sum == {}".format(wghts.sum()))
         good = wghts > 0
         inds = inds[good]
         wghts = wghts[good]
@@ -227,7 +234,8 @@ class GenMIST(object):
         #                                  r=np.sqrt(self.ndim))
         #except(AttributeError):
         inds = self._kdt.query_ball_point(xtarg.reshape(1, -1),
-                                          np.sqrt(self.ndim))
+                                          # np.sqrt(self.ndim))
+                                          self.dist)
         return np.sort(inds[0])
 
     def linear_weights(self, knearest, xtarg):
