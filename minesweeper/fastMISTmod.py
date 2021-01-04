@@ -6,7 +6,7 @@ import h5py
 #try:
 #    from sklearn.neighbors import KDTree
 #except(ImportError):
-from scipy.spatial import KDTree as KDTree
+from scipy.spatial import cKDTree as KDTree
 
 from numpy.lib import recfunctions
 import minesweeper
