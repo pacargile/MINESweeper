@@ -58,6 +58,27 @@ class likelihood(object):
                'log_Teff':'log(Teff)',
                'log_g':'log(g)',}
 
+     def predMIST(self,inpars):
+          MISTpred = self.GMIST.getMIST(
+               eep= inpars['EEP'],
+               mass=inpars['initial_Mass'],
+               feh= inpars['initial_[Fe/H]'],
+               afe= inpars['initial_[a/Fe]'],
+               verbose=False,
+               )
+          if MISTpred is None:
+               return None
+
+          # stick MIST model pars into useful dict format
+          MISTdict = ({
+               kk:pp for kk,pp in zip(
+                    self.GMIST.modpararr,MISTpred)
+               })
+          for kk in MISTdict.keys():
+               if kk in self.MISTrename.keys():
+                    MISTdict[self.MISTrename[kk]] = MISTdict.pop(kk)
+          return MISTdict
+
      def lnlikefn(self,pars):
 
           # build the parameter dictionary
@@ -70,14 +91,10 @@ class likelihood(object):
           # first check to see if EEP is in pars, if so query 
           # isochrones for stellar parameters
           if 'EEP' in self.parsdict.keys():
-               MISTpred = self.GMIST.getMIST(
-                    eep=self.parsdict['EEP'],
-                    mass=self.parsdict['initial_Mass'],
-                    feh=self.parsdict['initial_[Fe/H]'],
-                    afe=self.parsdict['initial_[a/Fe]'],
-                    verbose=False,
-                    )
-               if type(MISTpred) == type(None):
+               # make the MIST prediction
+               MISTdict = self.predMIST(self.parsdict)
+
+               if type(MISTdict) == type(None):
                     self.parsdict['Teff']   = np.inf
                     self.parsdict['log(g)'] = np.inf
                     self.parsdict['[Fe/H]'] = np.inf
@@ -90,15 +107,6 @@ class likelihood(object):
                     self.parsdict['Mass']     = np.inf
                     self.parsdict['log(L)']   = np.inf
                     return -np.inf
-
-               # stick MIST model pars into useful dict format
-               MISTdict = ({
-                    kk:pp for kk,pp in zip(
-                         self.GMIST.modpararr,MISTpred)
-                    })
-               for kk in MISTdict.keys():
-                    if kk in self.MISTrename.keys():
-                         MISTdict[self.MISTrename[kk]] = MISTdict.pop(kk)
 
                self.parsdict['Teff']   = 10.0**MISTdict['log(Teff)']
                self.parsdict['log(g)'] = MISTdict['log(g)']
