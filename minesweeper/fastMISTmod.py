@@ -11,28 +11,6 @@ from scipy.spatial import cKDTree as KDTree
 from numpy.lib import recfunctions
 import minesweeper
 
-# rename = {# Input
-#           "mass": "initial_mass",
-#           "eep": "EEP",
-#           "feh": "initial_[Fe/H]",
-#           "afe": "initial_[a/Fe]",
-#           # Output
-#           # "mass": "star_mass",
-#           "feh_surf": "[Fe/H]",
-#           "loga": "log_age",
-#           "logt": "log_Teff",
-#           "logg": "log_g",
-#           "logl": "log_L",
-#           "logr": "log_R"
-#           }
-
-# rename_out = deepcopy(rename)
-# rename_out["loga"] = "log(Age)"
-# rename_out["mass"] = "Mass"
-# rename_out["logr"] = "log(Rad)"
-# rename_out["logl"] = "log(L)"
-# rename_out["logt"] = "log(Teff)"
-# rename_out["logg"] = "log(g)"
 
 # dictionary to translate par names to MIST names
 MISTrename = {
@@ -64,7 +42,7 @@ class GenMIST(object):
         # turn on age weighting
         self.ageweight = kwargs.get('ageweight',True)
         
-        self.labels = kwargs.get('labels',['EEP','initial_mass','initial_[Fe/H]','initial_[a/Fe]'])
+        self.labels = kwargs.get('labels',['EEP','initial_Mass','initial_[Fe/H]','initial_[a/Fe]'])
         # list of output parametrs you want from MIST 
         # in addition to EEP, init_mass, init_FeH
         self.predictions = kwargs.get('predictions',
@@ -98,7 +76,8 @@ class GenMIST(object):
     def make_lib(self, misth5):
         """Convert the HDF5 input to ndarrays for labels and outputs.
         """
-        cols = self.labels
+        # cols = self.labels
+        cols = ['EEP','initial_mass','initial_[Fe/H]','initial_[a/Fe]']
         self.libparams = np.concatenate([np.array(misth5[z])[cols] for z in misth5["index"]])
         self.libparams.dtype.names = tuple(self.labels)
 
@@ -107,7 +86,7 @@ class GenMIST(object):
                        for p in cols]
         self.output = np.array(self.output)
 
-        self.libparams['initial_mass']   = np.around(self.libparams['initial_mass'],decimals=2)
+        self.libparams['initial_Mass']   = np.around(self.libparams['initial_Mass'],decimals=2)
         self.libparams['initial_[Fe/H]'] = np.around(self.libparams['initial_[Fe/H]'],decimals=2)
         self.libparams['initial_[a/Fe]'] = np.around(self.libparams['initial_[a/Fe]'],decimals=2)
 
@@ -117,32 +96,6 @@ class GenMIST(object):
         #     self.addagewgt()
 
         self.output = self.output.T
-
-    # def addagewgt(self):
-    #     # print('... Calculating Age Weighting')
-    #     # age_ind = self.predictions.index("log(Age)")
-    #     # age_wgtarr = np.zeros(len(self.libparams['EEP']))
-
-    #     # for z in np.unique(self.libparams['initial_[Fe/H]']):
-    #     #     for a in np.unique(self.libparams['initial_[a/Fe]']):
-    #     #         for m in np.unique(self.libparams['initial_mass']):
-    #     #             inds = (
-    #     #                 (self.libparams["initial_mass"] == m) & 
-    #     #                 (self.libparams["initial_[Fe/H]"] == z) & 
-    #     #                 (self.libparams["initial_[a/Fe]"] == a) 
-    #     #                 )
-    #     #             if inds.sum() > 1:
-    #     #                 aa = self.output[:,inds][age_ind]
-    #     #                 grad = np.gradient(aa)
-    #     #                 age_wgtarr[inds] = grad/np.sum(grad)
-    #     #                 # self.output[:,inds][-1] = grad/np.sum(grad)
-    #     #                 # print(self.output[:,inds][-1][0])
-
-    #     # # check for zeros and replace with small value to keep from throwing errors
-    #     # cond = age_wgtarr < np.finfo(np.float).eps
-    #     # age_wgtarr[cond] = np.finfo(np.float).eps
-
-    #     self.output = np.vstack((self.output,age_wgtarr))
 
     def getMIST(self, mass=1.0, eep=300, feh=0.0, afe=0.0, **kwargs):
         """
@@ -199,7 +152,7 @@ class GenMIST(object):
     def weights(self, **params):
         # translate keys into MIST model names
         params['EEP'] = params.pop('eep')
-        params['initial_mass'] = params.pop('mass')
+        params['initial_Mass'] = params.pop('mass')
         params['initial_[Fe/H]'] = params.pop('feh')
         params['initial_[a/Fe]'] = params.pop('afe')
 

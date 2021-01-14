@@ -3,6 +3,7 @@ from .genmod import GenMod
 from .fastMISTmod import GenMIST
 from datetime import datetime
 
+
 class likelihood(object):
      """docstring for likelihood"""
      def __init__(self,fitargs,fitpars,runbools,**kwargs):
@@ -38,7 +39,7 @@ class likelihood(object):
           if fitpars[1]['EEP']:
                self.GMIST = GenMIST(MISTpath=self.fitargs['MISTpath'],
                     ageweight=self.ageweight)
-               # self.GMIST._initMIST(ageweight=True,fast=False)
+
 
           # determine the number of dims
           self.ndim = 0
@@ -50,13 +51,13 @@ class likelihood(object):
 
 
           # dictionary to translate par names to MIST names
-          self.MISTrename = {
+          self.MISTrename = ({
                'log_age':'log(Age)',
                'star_mass':'Mass',
                'log_R':'log(R)',
                'log_L':'log(L)',
                'log_Teff':'log(Teff)',
-               'log_g':'log(g)',}
+               'log_g':'log(g)',})
 
      def predMIST(self,inpars):
           MISTpred = self.GMIST.getMIST(
@@ -94,7 +95,7 @@ class likelihood(object):
                # make the MIST prediction
                MISTdict = self.predMIST(self.parsdict)
 
-               if type(MISTdict) == type(None):
+               if MISTdict is None:
                     self.parsdict['Teff']   = np.inf
                     self.parsdict['log(g)'] = np.inf
                     self.parsdict['[Fe/H]'] = np.inf
@@ -156,6 +157,13 @@ class likelihood(object):
 
           # add the prior on Agewgt
           if self.ageweight:
+               if self.parsdict['Agewgt'] < 0.0:
+                    print(
+                         self.parsdict['EEP'],
+                         self.parsdict['initial_Mass'],
+                         self.parsdict['initial_[Fe/H]'],
+                         self.parsdict['initial_[a/Fe]'],
+                         self.parsdict['Agewgt'])
                lnlike_i += np.log(self.parsdict['Agewgt'])
 
           if lnlike_i == np.nan:
@@ -190,6 +198,7 @@ class likelihood(object):
                     [((sedmod[kk]-self.fitargs['obs_phot'][kk][0])**2.0)/(self.fitargs['obs_phot'][kk][1]**2.0) 
                     for kk in self.fitargs['obs_phot'].keys()]
                     )
+
           else:
                sedchi2 = 0.0
 

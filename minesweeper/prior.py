@@ -451,7 +451,7 @@ class prior(object):
           if len(self.additionalpriors.keys()) > 0:
                for kk in self.additionalpriors.keys():
                     lnprior_i = 0.0
-                    if kk in ['EEP','initial_mass','initial_[Fe/H]','initial_[a/Fe]','log(Age)','Age']:
+                    if kk in ['EEP','initial_Mass','initial_[Fe/H]','initial_[a/Fe]','log(Age)','Age']:
                          if kk == 'Age':
                               parsdict['Age'] = 10.0**(parsdict['log(Age)']-9.0)
                          # if prior is Gaussian
