@@ -42,6 +42,7 @@ class prior(object):
           self.priordict['exp'] = {}
           self.priordict['texp'] = {}
           self.priordict['loguniform'] = {}
+          self.priordict['beta'] = {}
 
           # put any additional priors into a dictionary so that
           # they can be applied in the lnprior_* functions
@@ -97,6 +98,8 @@ class prior(object):
                               self.priordict['texp'][kk] = inpriordict[kk]['pv_texp']
                          elif ii == 'pv_loguniform':
                               self.priordict['loguniform'][kk] = inpriordict[kk]['pv_loguniform']
+                         elif ii == 'pv_beta':
+                              self.priordict['beta'][kk] = inpriordict[kk]['pv_beta']
                          else:
                               try:
                                    self.additionalpriors[kk][ii] = inpriordict[kk][ii]
@@ -185,11 +188,19 @@ class prior(object):
                          par_i = norm.ppf(upars_i,loc=self.priordict['gaussian'][namepar][0],scale=self.priordict['gaussian'][namepar][1])
 
                     elif namepar in self.priordict['tgaussian'].keys():
-                         a = (self.priordict['tgaussian'][namepar][0] - self.priordict['tgaussian'][namepar][2]) / self.priordict['tgaussian'][namepar][3]
-                         b = (self.priordict['tgaussian'][namepar][1] - self.priordict['tgaussian'][namepar][2]) / self.priordict['tgaussian'][namepar][3]
-                         par_i = truncnorm.ppf(upars_i,a,b,loc=self.priordict['tgaussian'][namepar][2],scale=self.priordict['tgaussian'][namepar][3])
+                         loc = self.priordict['tgaussian'][namepar][2]
+                         scale = self.priordict['tgaussian'][namepar][3]
+                         a = (self.priordict['tgaussian'][namepar][0] - loc) / scale
+                         b = (self.priordict['tgaussian'][namepar][1] - loc) / scale
+                         par_i = truncnorm.ppf(upars_i,a,b,loc=loc,scale=scale)
                          if par_i == np.inf:
                               par_i = self.priordict['tgaussian'][namepar][1]
+                    elif namepar in self.priordict['beta'].keys():
+                         a = self.priordict['gaussian'][namepar][0]
+                         b = self.priordict['gaussian'][namepar][1]
+                         loc = self.priordict['gaussian'][namepar][2]
+                         scale = self.priordict['gaussian'][namepar][3]
+                         par_i = beta.ppf(upars_i,a,b,loc=loc,scale=scale)
                     else:
                          par_i = (self.defaultpars[namepar][1]-self.defaultpars[namepar][0])*upars_i + self.defaultpars[namepar][0]
 
@@ -216,11 +227,19 @@ class prior(object):
                          par_i = norm.ppf(upars_i,loc=self.priordict['gaussian'][namepar][0],scale=self.priordict['gaussian'][namepar][1])
 
                     elif namepar in self.priordict['tgaussian'].keys():
-                         a = (self.priordict['tgaussian'][namepar][0] - self.priordict['tgaussian'][namepar][2]) / self.priordict['tgaussian'][namepar][3]
-                         b = (self.priordict['tgaussian'][namepar][1] - self.priordict['tgaussian'][namepar][2]) / self.priordict['tgaussian'][namepar][3]                     
-                         par_i = truncnorm.ppf(upars_i,a,b,loc=self.priordict['tgaussian'][namepar][2],scale=self.priordict['tgaussian'][namepar][3])
+                         loc = self.priordict['tgaussian'][namepar][2]
+                         scale = self.priordict['tgaussian'][namepar][3]
+                         a = (self.priordict['tgaussian'][namepar][0] - loc) / scale
+                         b = (self.priordict['tgaussian'][namepar][1] - loc) / scale
+                         par_i = truncnorm.ppf(upars_i,a,b,loc=loc,scale=scale)
                          if par_i == np.inf:
                               par_i = self.priordict['tgaussian'][namepar][1]
+                    elif namepar in self.priordict['beta'].keys():
+                         a = self.priordict['gaussian'][namepar][0]
+                         b = self.priordict['gaussian'][namepar][1]
+                         loc = self.priordict['gaussian'][namepar][2]
+                         scale = self.priordict['gaussian'][namepar][3]
+                         par_i = beta.ppf(upars_i,a,b,loc=loc,scale=scale)
                     elif namepar in self.priordict['exp'].keys():
                          par_i = expon.ppf(upars_i,loc=self.priordict['exp'][namepar][0],scale=self.priordict['exp'][namepar][1])
                     else:
@@ -263,11 +282,20 @@ class prior(object):
                               par_i = norm.ppf(upars_i,loc=self.priordict['gaussian'][namepar][0],scale=self.priordict['gaussian'][namepar][1])
 
                          elif namepar in self.priordict['tgaussian'].keys():
-                              a = (self.priordict['tgaussian'][namepar][0] - self.priordict['tgaussian'][namepar][2]) / self.priordict['tgaussian'][namepar][3]
-                              b = (self.priordict['tgaussian'][namepar][1] - self.priordict['tgaussian'][namepar][2]) / self.priordict['tgaussian'][namepar][3]
-                              par_i = truncnorm.ppf(upars_i,a,b,loc=self.priordict['tgaussian'][namepar][2],scale=self.priordict['tgaussian'][namepar][3])
+                              loc = self.priordict['tgaussian'][namepar][2]
+                              scale = self.priordict['tgaussian'][namepar][3]
+                              a = (self.priordict['tgaussian'][namepar][0] - loc) / scale
+                              b = (self.priordict['tgaussian'][namepar][1] - loc) / scale
+                              par_i = truncnorm.ppf(upars_i,a,b,loc=loc,scale=scale)
                               if par_i == np.inf:
                                    par_i = self.priordict['tgaussian'][namepar][1]
+                         elif namepar in self.priordict['beta'].keys():
+                              a = self.priordict['gaussian'][namepar][0]
+                              b = self.priordict['gaussian'][namepar][1]
+                              loc = self.priordict['gaussian'][namepar][2]
+                              scale = self.priordict['gaussian'][namepar][3]
+                              par_i = beta.ppf(upars_i,a,b,loc=loc,scale=scale)
+
                          elif namepar in self.priordict['exp'].keys():
                               par_i = expon.ppf(upars_i,loc=self.priordict['exp'][namepar][0],scale=self.priordict['exp'][namepar][1])
                          else:
@@ -297,18 +325,29 @@ class prior(object):
                          par_i = expon.ppf(upars_i,loc=self.priordict['exp'][namepar][0],scale=self.priordict['exp'][namepar][1])
 
                     elif namepar in self.priordict['tgaussian'].keys():
-                         a = (self.priordict['tgaussian'][namepar][0] - self.priordict['tgaussian'][namepar][2]) / self.priordict['tgaussian'][namepar][3]
-                         b = (self.priordict['tgaussian'][namepar][1] - self.priordict['tgaussian'][namepar][2]) / self.priordict['tgaussian'][namepar][3]
-                         par_i = truncnorm.ppf(upars_i,a,b,loc=self.priordict['tgaussian'][namepar][2],scale=self.priordict['tgaussian'][namepar][3])
+                         loc = self.priordict['tgaussian'][namepar][2]
+                         scale = self.priordict['tgaussian'][namepar][3]
+                         a = (self.priordict['tgaussian'][namepar][0] - loc) / scale
+                         b = (self.priordict['tgaussian'][namepar][1] - loc) / scale
+                         par_i = truncnorm.ppf(upars_i,a,b,loc=loc,scale=scale)
                          if par_i == np.inf:
                               par_i = self.priordict['tgaussian'][namepar][1]
 
                     elif namepar in self.priordict['texp'].keys():
-                         a = (self.priordict['texp'][namepar][0] - self.priordict['texp'][namepar][2]) / self.priordict['texp'][namepar][3]
-                         b = (self.priordict['texp'][namepar][1] - self.priordict['texp'][namepar][2]) / self.priordict['texp'][namepar][3]
-                         par_i = truncexpon.ppf(upars_i,a,b,loc=self.priordict['texp'][namepar][2],scale=self.priordict['texp'][namepar][3])
+                         loc = self.priordict['texp'][namepar][2]
+                         scale = self.priordict['texp'][namepar][3]
+                         a = (self.priordict['texp'][namepar][0] - loc) / scale
+                         b = (self.priordict['texp'][namepar][1] - loc) / scale
+                         par_i = truncexpon.ppf(upars_i,a,b,loc=loc,scale=scale)
                          if par_i == np.inf:
                               par_i = self.priordict['texp'][namepar][1]
+
+                    elif namepar in self.priordict['beta'].keys():
+                         a = self.priordict['gaussian'][namepar][0]
+                         b = self.priordict['gaussian'][namepar][1]
+                         loc = self.priordict['gaussian'][namepar][2]
+                         scale = self.priordict['gaussian'][namepar][3]
+                         par_i = beta.ppf(upars_i,a,b,loc=loc,scale=scale)
 
                     elif namepar in self.priordict['loguniform'].keys():
                          par_i = reciprocal.ppf(upars_i, self.priordict['loguniform'][namepar][0], self.priordict['loguniform'][namepar][1])
