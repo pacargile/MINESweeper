@@ -17,6 +17,7 @@ class likelihood(object):
           self.phot_bool = runbools[1]
           self.normspec_bool = runbools[2]
           self.photscale_bool = runbools[3]
+          self.flux_bool = runbools[4]
 
           # run with weights such that d(EEP)/d(age) = constant
           self.ageweight = self.fitargs['ageweight']
@@ -30,8 +31,16 @@ class likelihood(object):
 
           # initialize the ANN for spec and phot if user defined
           if self.spec_bool:
-               self.GM._initspecnn(nnpath=fitargs['specANNpath'],
-                    NNtype=self.fitargs['NNtype'])
+               if self.flux_bool:
+                    self.GM._initspecnn(
+                         nnpath=fitargs['specANNpath'],
+                         NNtype=self.fitargs['NNtype'],
+                         Cnnpath=fitargs['contANNpath'])
+               else:
+                    self.GM._initspecnn(
+                         nnpath=fitargs['specANNpath'],
+                         NNtype=self.fitargs['NNtype'],)
+
           if self.phot_bool:
                self.GM._initphotnn(self.fitargs['obs_phot'].keys(),
                     nnpath=fitargs['photANNpath'])

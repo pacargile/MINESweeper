@@ -12,12 +12,7 @@ class GenMod(object):
           super(GenMod, self).__init__()
           self.verbose = kwargs.get('verbose',False)
 
-     def _initspecnn(self,nnpath=None, NNtype='YST1'):
-          
-          # if (NNtype == 'YST0') | (NNtype == 'YST1') | (NNtype == 'YST2'):
-          #      YST = True
-          # else:
-          #      YST = False
+     def _initspecnn(self,nnpath=None, NNtype='YST1',**kwargs):
 
           from .fitutils import polycalc
           if NNtype == 'PC':
@@ -26,9 +21,13 @@ class GenMod(object):
                from Payne.predict.ystpred import PayneSpecPredict
 
           # initialize the Payne Spectrum Predictor
-          self.PP = PayneSpecPredict(nnpath)
+          Cnnpath = kwargs.get('Cnnpath',None)
+          if Cnnpath is None:
+               self.PP = PayneSpecPredict(nnpath=nnpath)
+          else:
+               self.PP = PayneSpecPredict(nnpath=nnpath,Cnnpath=Cnnpath)
 
-     def _initphotnn(self,filterarray,nnpath=None):
+     def _initphotnn(self,filterarray=None,nnpath=None,**kwargs):
           self.filterarray = filterarray
 
           from Payne.predict.predictsed import FastPayneSEDPredict
@@ -65,9 +64,17 @@ class GenMod(object):
           if normspec_bool:
                polycoef = pars[8:]
 
+          # check to see if inst_R is a float or an array of dispersions
+          if isinstance(inst_R,float):
+               input_inst_R = 2.355 * inst_R
+          else:
+               input_inst_R = inst_R
+
           # predict model flux at model wavelengths
           modwave_i,modflux_i = self.PP.getspec(
-               Teff=Teff,logg=logg,feh=FeH,afe=aFe,rad_vel=radvel,rot_vel=rotvel,vmic=vmic,inst_R=2.355*inst_R,
+               Teff=Teff,logg=logg,feh=FeH,afe=aFe,
+               rad_vel=radvel,rot_vel=rotvel,vmic=vmic,
+               inst_R=input_inst_R,
                outwave=outwave)
           
           # if polynomial normalization is turned on then multiply model by it

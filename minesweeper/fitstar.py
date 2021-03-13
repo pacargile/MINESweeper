@@ -44,6 +44,7 @@ class FitMS(object):
           self.phot_bool = False
           self.normspec_bool = False
           self.photscale_bool = False
+          self.flux_bool = False
 
           # create array of all possible fit parameters
           self.fitpars = ([
@@ -79,6 +80,12 @@ class FitMS(object):
                # deterimine if user defined spec ANN path
                self.fitargs['specANNpath'] = inputdict.get('specANNpath',None)
                self.fitargs['NNtype'] = inputdict.get('NNtype','PC')
+
+               # determine if user wants to fit fluxed spectrum
+               contpath = inputdict.get('contANNpath',None)
+               if contpath is not None:
+                    self.fitargs['contANNpath'] = contpath
+                    self.flux_bool = True
 
                # check to see if user defined some wavelength range for spectrum
                if 'wave_minmax' in inputdict['spec'].keys():
@@ -198,14 +205,17 @@ class FitMS(object):
                          self.fitargs['fixedpars'][kk] = self.priordict[kk]['fixed']
                          self.fitpars_bool[kk] = False                    
 
-          print('... MS sampling pars:')
-          for kk in self.fitpars_bool.keys():
-               if self.fitpars_bool[kk]:
-                    print('    ... {}'.format(kk))
+          if self.verbose:
+               print('... MS sampling pars:')
+               for kk in self.fitpars_bool.keys():
+                    if self.fitpars_bool[kk]:
+                         print('    ... {}'.format(kk))
 
-          print('... MS prior dict info:')
-          for kk in self.priordict.keys():
-               print(kk,self.priordict[kk])
+          # if self.verbose:
+          #      print('... MS prior dict info:')
+          #      for kk in self.priordict.keys():
+          #           print(kk,self.priordict[kk])
+
           # run the fitter
           return self({
                'fitargs':self.fitargs,
@@ -215,7 +225,8 @@ class FitMS(object):
                'runbools':(
                     [self.spec_bool,self.phot_bool,
                     self.normspec_bool,
-                    self.photscale_bool])
+                    self.photscale_bool,
+                    self.flux_bool])
                })
 
      def _initoutput(self,parnames):
@@ -364,7 +375,11 @@ class FitMS(object):
                self.outff.write('{0} '.format(it))
                # self.outff.write(' '.join([str(q) for q in vstar]))
                try:
-                    self.outff.write(' '.join([str(self.likeobj.parsdict[q]) for q in parnames]))
+                    self.outff.write(
+                         ' '.join(
+                              [str(self.likeobj.parsdict[q]) 
+                              if (isinstance(self.likeobj.parsdict[q],float) or isinstance(self.likeobj.parsdict[q],int)) 
+                              else 'nan' for q in parnames]))
                except:
                     print('Sampling broke')
                     print('worst:',worst)
@@ -437,7 +452,13 @@ class FitMS(object):
 
                # self.outff.write(' '.join([str(q) for q in vstar]))
                self.likeobj.lnlikefn(vstar)
-               self.outff.write(' '.join([str(self.likeobj.parsdict[q]) for q in parnames]))
+               self.outff.write(
+                    ' '.join(
+                         [str(self.likeobj.parsdict[q]) 
+                         if (isinstance(self.likeobj.parsdict[q],float) or isinstance(self.likeobj.parsdict[q],int)) 
+                         else 'nan' for q in parnames]))
+
+               # self.outff.write(' '.join([str(self.likeobj.parsdict[q]) for q in parnames]))
                self.outff.write(' {0} {1} {2} {3} {4} {5} {6} '.format(
                     loglstar,logvol,logwt,h,nc,logz,delta_logz))
                self.outff.write('\n')
@@ -538,8 +559,12 @@ class FitMS(object):
                     self._initoutput(parnames)
 
                self.outff.write('{0} '.format(it))
-               # self.outff.write(' '.join([str(q) for q in vstar]))
-               self.outff.write(' '.join([str(self.likeobj.parsdict[q]) for q in parnames]))
+               self.outff.write(
+                    ' '.join(
+                         [str(self.likeobj.parsdict[q]) 
+                         if (isinstance(self.likeobj.parsdict[q],float) or isinstance(self.likeobj.parsdict[q],int))
+                         else 'nan' 
+                         for q in parnames]))
                self.outff.write(' {0} {1} {2} {3} {4} {5} {6} '.format(
                     loglstar,logvol,logwt,h,nc,logz,delta_logz))
                self.outff.write('\n')
@@ -602,7 +627,12 @@ class FitMS(object):
 
                          # self.outff.write(' '.join([str(q) for q in vstar]))
                          self.likeobj.lnlikefn(vstar)
-                         self.outff.write(' '.join([str(self.likeobj.parsdict[q]) for q in parnames]))
+                         self.outff.write(
+                              ' '.join(
+                                   [str(self.likeobj.parsdict[q]) 
+                                   if (isinstance(self.likeobj.parsdict[q],float) or isinstance(self.likeobj.parsdict[q],int))
+                                   else 'nan' 
+                                   for q in parnames]))
                          self.outff.write(' {0} {1} {2} {3} {4} {5} {6} '.format(
                               loglstar,logvol,logwt,h,nc,logz,delta_logz))
                          self.outff.write('\n')
