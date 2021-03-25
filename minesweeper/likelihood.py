@@ -189,7 +189,7 @@ class likelihood(object):
                modwave_i,modflux_i = specmod
                
                # calc chi-square for spec
-               specchi2 = np.sum( 
+               specchi2 = np.nansum( 
                     [((m-o)**2.0)/(s**2.0) for m,o,s in zip(
                          modflux_i,self.fitargs['obs_flux_fit'],self.fitargs['obs_eflux_fit'])])
           else:
@@ -203,7 +203,7 @@ class likelihood(object):
                     sedmod  = self.GM.genphot(photpars)
 
                # calculate chi-square for SED
-               sedchi2 = np.sum(
+               sedchi2 = np.nansum(
                     [((sedmod[kk]-self.fitargs['obs_phot'][kk][0])**2.0)/(self.fitargs['obs_phot'][kk][1]**2.0) 
                     for kk in self.fitargs['obs_phot'].keys()]
                     )
@@ -214,4 +214,5 @@ class likelihood(object):
           # print('LnL:',specpars,photpars,-0.5*(specchi2+sedchi2))
 
           # return ln(like) = -0.5 * chi-square
+
           return -0.5*(specchi2+sedchi2)
