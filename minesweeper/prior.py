@@ -119,7 +119,7 @@ class prior(object):
           self.defaultpars['[Fe/H]'] = [-4.0,0.5]
           self.defaultpars['[a/Fe]'] = [-0.2,0.6]
           self.defaultpars['Vrad']   = [-700.0,700.0]
-          self.defaultpars['Vrot']   = [0,15.0]
+          self.defaultpars['Vrot']   = [0,30.0]
           self.defaultpars['Vmic']   = [0.5,3.0]
           self.defaultpars['Inst_R'] = [10000.0,60000.0]
           self.defaultpars['log(A)'] = [-3.0,7.0]
@@ -131,8 +131,8 @@ class prior(object):
           self.defaultpars['initial_Mass'] = [0.25,30.0]
           self.defaultpars['initial_[Fe/H]'] = [-4.0,0.5]
           self.defaultpars['initial_[a/Fe]'] = [-0.2,0.6]
-          self.defaultpars['log(Age)'] = [6.0,10.2]
-          self.defaultpars['Age'] = [4.0,14.0]
+          self.defaultpars['log(Age)'] = [9.0,10.2]
+          self.defaultpars['Age'] = [1.0,14.0]
 
           APdict = {}
           if self.gal_bool:
@@ -512,6 +512,12 @@ class prior(object):
                          if 'gaussian' in self.additionalpriors[kk].keys():
                               lnprior_i += -0.5 * (((parsdict[kk]-self.additionalpriors[kk]['gaussian'][0])**2.0)/
                                    (self.additionalpriors[kk]['gaussian'][1]**2.0))
+                         if 'tgaussian' in self.additionalpriors[kk].keys():
+                              if ((parsdict[kk] < self.additionalpriors[kk]['tgaussian'][0]) or 
+                                   (parsdict[kk] > self.additionalpriors[kk]['tgaussian'][1])):
+                                   return -np.inf                              
+                              lnprior_i += -0.5 * (((parsdict[kk]-self.additionalpriors[kk]['tgaussian'][2])**2.0)/
+                                   (self.additionalpriors[kk]['tgaussian'][3]**2.0))
                          if 'beta' in self.additionalpriors[kk].keys():
                               raise IOError('Beta Prior not implimented yet!!!')
                          if 'log-normal' in self.additionalpriors[kk].keys():
@@ -548,6 +554,10 @@ class prior(object):
                          if 'gaussian' in self.additionalpriors[kk].keys():
                               lnprior += -0.5 * (((parsdict[kk]-self.additionalpriors[kk]['gaussian'][0])**2.0)/
                                    (self.additionalpriors[kk]['gaussian'][1]**2.0))
+                         if 'tgaussian' in self.additionalpriors[kk].keys():
+                              if ((parsdict[kk] < self.additionalpriors[kk]['tgaussian'][0]) or 
+                                   (parsdict[kk] > self.additionalpriors[kk]['tgaussian'][1])):
+                                   return -np.inf                              
                          if 'beta' in self.additionalpriors[kk].keys():
                               raise IOError('Beta Prior not implimented yet!!!')
                          if 'log-normal' in self.additionalpriors[kk].keys():
@@ -595,6 +605,10 @@ class prior(object):
                          if 'gaussian' in self.additionalpriors[kk].keys():
                               lnprior_i += -0.5 * (((parsdict_i[kk]-self.additionalpriors[kk]['gaussian'][0])**2.0)/
                                    (self.additionalpriors[kk]['gaussian'][1]**2.0))
+                         if 'tgaussian' in self.additionalpriors[kk].keys():
+                              if ((parsdict[kk] < self.additionalpriors[kk]['tgaussian'][0]) or 
+                                   (parsdict[kk] > self.additionalpriors[kk]['tgaussian'][1])):
+                                   return -np.inf                              
                          if 'beta' in self.additionalpriors[kk].keys():
                               raise IOError('Beta Prior not implimented yet!!!')
                          if 'log-normal' in self.additionalpriors[kk].keys():
