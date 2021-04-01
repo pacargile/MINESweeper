@@ -76,7 +76,7 @@ class GenMod(object):
                rad_vel=radvel,rot_vel=rotvel,vmic=vmic,
                inst_R=input_inst_R,
                outwave=outwave)
-          
+
           # if polynomial normalization is turned on then multiply model by it
           if normspec_bool:
                poly = polycalc(polycoef,outwave)

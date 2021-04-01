@@ -796,15 +796,28 @@ class AdvancedPriors(object):
         halo_p  = kwargs.get('halo', {'min':8.0,'max':14.0,'mean':12.0,'sigma':2.0})
 
         # now compute individual age probabilities
-        age_lnp_thin = self.logp_age_unif(age,age_min=thin_p['min'],age_max=thin_p['max'])
+        if ('mean' in thin_p.keys()):
+            age_lnp_thin = self.logp_age_normal(
+                age,age_min=thin_p['min'],age_max=thin_p['max'],
+                age_mean=thin_p['mean'],age_sigma=thin_p['sigma'])
+        else:
+            age_lnp_thin = self.logp_age_unif(age,age_min=thin_p['min'],age_max=thin_p['max'])
         age_lnp_thin += lnp_thin
 
-        age_lnp_thick = self.logp_age_normal(age,age_min=thick_p['min'],age_max=thick_p['max'],
-            age_mean=thick_p['mean'],age_sigma=thick_p['sigma'])
+        if ('mean' in thick_p.keys()):
+            age_lnp_thick = self.logp_age_normal(
+                age,age_min=thick_p['min'],age_max=thick_p['max'],
+                age_mean=thick_p['mean'],age_sigma=thick_p['sigma'])
+        else:
+            age_lnp_thick = self.logp_age_unif(age,age_min=thick_p['min'],age_max=thick_p['max'])
         age_lnp_thick += lnp_thick
 
-        age_lnp_halo = self.logp_age_normal(age,age_min=halo_p['min'],age_max=halo_p['max'],
-            age_mean=halo_p['mean'],age_sigma=halo_p['sigma'])
+        if ('mean' in halo_p.keys()):
+            age_lnp_halo = self.logp_age_normal(
+                age,age_min=halo_p['min'],age_max=halo_p['max'],
+                age_mean=halo_p['mean'],age_sigma=halo_p['sigma'])
+        else:
+            age_lnp_halo = self.logp_age_unif(age,age_min=halo_p['min'],age_max=halo_p['max'])
         age_lnp_halo += lnp_halo
 
         lnprior = logsumexp([age_lnp_thin, age_lnp_thick, age_lnp_halo],
