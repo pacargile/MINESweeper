@@ -77,6 +77,9 @@ class GenMod(object):
                inst_R=input_inst_R,
                outwave=outwave)
 
+          if outwave is None:
+               outwave = modwave_i
+               
           # if polynomial normalization is turned on then multiply model by it
           if normspec_bool:
                poly = polycalc(polycoef,outwave)
