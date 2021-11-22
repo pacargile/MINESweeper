@@ -109,7 +109,7 @@ class prior(object):
           # split up the boolean flags
           self.spec_bool = runbools[0]
           self.phot_bool = runbools[1]
-          self.normspec_bool = runbools[2]
+          self.modpoly_bool = runbools[2]
           self.photscale_bool = runbools[3]
 
           # dictionary of default parameter ranges
@@ -563,7 +563,7 @@ class prior(object):
                          if 'log-normal' in self.additionalpriors[kk].keys():
                               raise IOError('Log-Normal Prior not implimented yet!!!')
           # # if fitting a blaze function, then check for additional priors
-          # if self.normspec_bool:
+          # if self.modpoly_bool:
           #    for pp in self.fitpars_i:
           #         if pp[:2] == 'pc_':
           #              lnprior += -0.5 * ((parsdict[pp]/self.polycoefarr[kk][1])**2.0)

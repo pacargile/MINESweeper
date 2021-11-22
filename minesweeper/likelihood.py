@@ -15,7 +15,7 @@ class likelihood(object):
           # split up the boolean flags
           self.spec_bool = runbools[0]
           self.phot_bool = runbools[1]
-          self.normspec_bool = runbools[2]
+          self.modpoly_bool = runbools[2]
           self.photscale_bool = runbools[3]
           self.flux_bool = runbools[4]
 
@@ -146,7 +146,7 @@ class likelihood(object):
                     if (pp in self.parsdict.keys()) else np.nan
                     for pp in ['Teff','log(g)','[Fe/H]','[a/Fe]','Vrad','Vrot','Vmic','Inst_R'] 
                     ])
-               if self.normspec_bool:
+               if self.modpoly_bool:
                     specpars = specpars + [self.parsdict[pp] for pp in self.fitpars_i if 'pc' in pp]
           else:
                specpars = None
@@ -185,7 +185,8 @@ class likelihood(object):
           if self.spec_bool:
                # generate model spectrum
 
-               specmod = self.GM.genspec(specpars,outwave=self.fitargs['obs_wave_fit'],normspec_bool=self.normspec_bool)
+               specmod = self.GM.genspec(specpars,outwave=self.fitargs['obs_wave_fit'],
+                    modpoly_bool=self.modpoly_bool)
                modwave_i,modflux_i = specmod
                
                # calc chi-square for spec

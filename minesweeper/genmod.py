@@ -49,7 +49,7 @@ class GenMod(object):
           #         print('Cannot find NN HDF5 file for {0}'.format(ff))
           # self.ANNdict = ANNdict
 
-     def genspec(self,pars,outwave=None,verbose=False,normspec_bool=False):
+     def genspec(self,pars,outwave=None,verbose=False,modpoly_bool=False):
           # define parameters from pars array
           Teff = pars[0]
           logg = pars[1]
@@ -61,7 +61,7 @@ class GenMod(object):
           inst_R = pars[7]
 
           # check to see if a polynomial is used for spectrum normalization
-          if normspec_bool:
+          if modpoly_bool:
                polycoef = pars[8:]
 
           # check to see if inst_R is a float or an array of dispersions
@@ -81,14 +81,14 @@ class GenMod(object):
                outwave = modwave_i
                
           # if polynomial normalization is turned on then multiply model by it
-          if normspec_bool:
+          if modpoly_bool:
                poly = polycalc(polycoef,outwave)
                # now multiply the model by the polynomial normalization poly
                modflux_i = modflux_i*poly
 
           return modwave_i,modflux_i
 
-     def genphot(self,pars,verbose=False):
+     def genphot(self,pars,rvfree=False,verbose=False):
           # define parameters from pars array
           Teff = pars[0]
           logg = pars[1]
@@ -97,6 +97,10 @@ class GenMod(object):
           logR = pars[4]
           Dist = pars[5]
           Av   = pars[6]
+          if rvfree:
+               Rv = pars[7]
+          else:
+               Rv = 3.1
 
           logTeff = np.log10(Teff)
 
@@ -111,7 +115,7 @@ class GenMod(object):
           photpars['logl'] = logL
           photpars['av']   = Av
           photpars['dist'] = Dist
-          photpars['rv'] = 3.1
+          photpars['rv'] = Rv
 
           # create filter list and arrange photometry to this list
 
@@ -131,7 +135,7 @@ class GenMod(object):
 
           return outdict
 
-     def genphot_scaled(self,pars,verbose=False):
+     def genphot_scaled(self,pars,rvfree=False,verbose=False):
           # define parameters from pars array
           Teff = pars[0]
           logg = pars[1]
@@ -139,6 +143,10 @@ class GenMod(object):
           aFe  = pars[3]
           logA = pars[4]
           Av   = pars[5]
+          if rvfree:
+               Rv = pars[6]
+          else:
+               Rv = 3.1
 
           logTeff = np.log10(Teff)
 
@@ -150,7 +158,7 @@ class GenMod(object):
           photpars['afe']  = aFe
           photpars['logA'] = logA
           photpars['av']   = Av
-          photpars['rv']   = 3.1
+          photpars['rv']   = Rv
 
           # create filter list and arrange photometry to this list
 
