@@ -186,7 +186,7 @@ class likelihood(object):
                # generate model spectrum
 
                specmod = self.GM.genspec(specpars,outwave=self.fitargs['obs_wave_fit'],
-                    modpoly_bool=self.modpoly_bool)
+                    modpoly=self.modpoly_bool)
                modwave_i,modflux_i = specmod
                
                # calc chi-square for spec

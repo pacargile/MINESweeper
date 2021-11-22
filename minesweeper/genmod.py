@@ -49,7 +49,7 @@ class GenMod(object):
           #         print('Cannot find NN HDF5 file for {0}'.format(ff))
           # self.ANNdict = ANNdict
 
-     def genspec(self,pars,outwave=None,verbose=False,modpoly_bool=False):
+     def genspec(self,pars,outwave=None,verbose=False,modpoly=False):
           # define parameters from pars array
           Teff = pars[0]
           logg = pars[1]
@@ -61,7 +61,7 @@ class GenMod(object):
           inst_R = pars[7]
 
           # check to see if a polynomial is used for spectrum normalization
-          if modpoly_bool:
+          if modpoly:
                polycoef = pars[8:]
 
           # check to see if inst_R is a float or an array of dispersions
@@ -81,7 +81,7 @@ class GenMod(object):
                outwave = modwave_i
                
           # if polynomial normalization is turned on then multiply model by it
-          if modpoly_bool:
+          if modpoly:
                poly = polycalc(polycoef,outwave)
                # now multiply the model by the polynomial normalization poly
                modflux_i = modflux_i*poly
