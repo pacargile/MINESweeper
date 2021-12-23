@@ -188,7 +188,7 @@ class likelihood(object):
                specmod = self.GM.genspec(specpars,outwave=self.fitargs['obs_wave_fit'],
                     modpoly=self.modpoly_bool)
                modwave_i,modflux_i = specmod
-               
+                              
                # calc chi-square for spec
                specchi2 = np.nansum( 
                     [((m-o)**2.0)/(s**2.0) for m,o,s in zip(
