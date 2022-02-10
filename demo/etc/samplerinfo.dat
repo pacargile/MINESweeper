@@ -3,7 +3,7 @@ samplertype      Static
 samplemethod     rwalk
 npoints          100
 samplerbounds    multi
-flushnum         1
+flushnum         100
 delta_logz_final 0.01
 walks            5
 maxcall          100000

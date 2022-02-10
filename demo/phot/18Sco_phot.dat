@@ -16,13 +16,9 @@ DECam_r      nan nan
 DECam_u      nan nan
 DECam_z      nan nan
 #
-GaiaDR2_BP   nan nan
-GaiaDR2_G    nan nan
-GaiaDR2_RP   nan nan
-GaiaMAW_BPb  5.6745 0.0023
-GaiaMAW_BPf  nan nan
-GaiaMAW_G    5.3026 0.0018
-GaiaMAW_RP   4.8664 0.0035
+GaiaEDR3_G   5.327651 0.002811
+GaiaEDR3_BP  5.654931 0.002940
+GaiaEDR3_RP  4.837854 0.005691
 #
 Hipparcos_Hp nan nan
 #

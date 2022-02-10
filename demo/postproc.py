@@ -112,7 +112,7 @@ class postproc(object):
 
               if np.isfinite(phot):
                   # Add a noise floor for photometry
-                  if filt.split('_')[0] == 'GaiaMAW':
+                  if filt.split('_')[0] == 'GaiaEDR3':
                       err = np.sqrt(err**2.0 + 0.05**2.0)
                   elif filt.split('_')[0] == '2MASS':
                       err = np.sqrt(err**2.0 + 0.02**2.0)
@@ -126,9 +126,9 @@ class postproc(object):
 
           inputdict = {}
           inputdict['spec'] = {}
-          inputdict['spec']['obs_wave']   = inspec['WAVE']
-          inputdict['spec']['obs_flux']   = inspec['FLUX']
-          inputdict['spec']['obs_eflux']  = inspec['EFLUX']
+          inputdict['spec']['obs_wave']   = inspec['waveobs']
+          inputdict['spec']['obs_flux']   = inspec['flux']
+          inputdict['spec']['obs_eflux']  = inspec['err']
 
 
           self.medflux = np.nanmedian(inputdict['spec']['obs_flux'])
@@ -483,7 +483,7 @@ class postproc(object):
           modwave_bf,modflux_bf = self.GM.genspec(
                pars_bf,
                outwave=self.spec['obs_wave'],
-               normspec_bool=False,
+               modpoly=False,
                )
           
           modflux_bf = modflux_bf#*self.medflux
@@ -804,7 +804,7 @@ if __name__ == '__main__':
      PP = postproc()
 
      parser = argparse.ArgumentParser()
-     parser.add_argument('--starname',    help='starname', type=str, default='HARPS.Archive_18Sco_R20K')
+     parser.add_argument('--starname',    help='starname', type=str, default='HARPS.Archive_18Sco_R32K')
      parser.add_argument('--samplerpath', help='path for output file', type=str, default='./MSoutput/')
      parser.add_argument('--pdfpath',     help='path for PDF file', type=str, default='./MSpdf/')
      args = parser.parse_args()
