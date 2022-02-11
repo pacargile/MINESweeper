@@ -1,10 +1,10 @@
 parameter        setting
 samplertype      Static
 samplemethod     rwalk
-npoints          100
+npoints          150
 samplerbounds    multi
-flushnum         100
+flushnum         10
 delta_logz_final 0.01
 walks            5
-maxcall          100000
-maxiter          10000
+maxcall          10000000
+maxiter          100000

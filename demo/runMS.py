@@ -76,9 +76,9 @@ for inphot_i in inphot:
         if filt.split('_')[0] == 'GaiaEDR3':
             err = np.sqrt(err**2.0 + 0.01**2.0)
         elif filt.split('_')[0] == '2MASS':
-            err = np.sqrt(err**2.0 + 0.02**2.0)
+            err = np.sqrt(err**2.0 + 0.05**2.0)
         elif filt.split('_')[0] == 'WISE':
-            err = np.sqrt(err**2.0 + 0.02**2.0)
+            err = np.sqrt(err**2.0 + 0.05**2.0)
         else:
             pass
 
@@ -134,14 +134,14 @@ inputdict['priordict']['initial_[Fe/H]'] = {'pv_uniform':[-4.0,0.0]}
 inputdict['priordict']['initial_[a/Fe]'] = {'pv_uniform':[-0.2,0.6]}
 
 inputdict['priordict']['Dist']   = {'pv_uniform':[1.0,100.0]}
-inputdict['priordict']['Av']     = {'pv_uniform':[0.0,0.5]}
+inputdict['priordict']['Av']     = {'pv_uniform':[0.0,0.1]}
 
-inputdict['priordict']['Vrad'] = {'pv_uniform':[-25.0,25.0]}
+inputdict['priordict']['Vrad'] = {'pv_uniform':[-5.0,5.0]}
 # inputdict['priordict']['Vrot'] = ({'pv_tgaussian':[0.0,7.0,0.0,2.0],})
 inputdict['priordict']['Vrot'] = ({'pv_uniform':[0.0,10.0]})
 
 # fixed sampling parameters 
-inputdict['priordict']['Inst_R'] = ({'fixed':32000.0})
+inputdict['priordict']['Inst_R'] = ({'fixed':35000.0})
 
 # Priors for predicted a posteriori parameters
 #

@@ -84,6 +84,8 @@ class postproc(object):
                print('--> Problem with input file, len == 0')
                return
 
+
+
           # check to see if any old style column names
           replacecolname = ({
                     'logg':'log(g)',
@@ -159,6 +161,8 @@ class postproc(object):
           # SAMPLEStab['Prob'] = SAMPLEStab['Prob']/SAMPLEStab['Prob'].sum()
           # SAMPLEStab = SAMPLEStab[SAMPLEStab['Prob'] > 1E-6]
           
+          SAMPLEStab = SAMPLEStab[SAMPLEStab['Prob'] > 0.0]
+
           outstat = self.genstat(
                SAMPLEStab,
                pararr,
@@ -197,14 +201,19 @@ class postproc(object):
                'Teff':   [r'T$_{eff}$ =',' {0:.1f} +{1:.1f}/-{2:.1f} ({3:.1f})\n'],
                'log(g)': [r'log(g) =',' {0:.3f} +{1:.3f}/-{2:.3f} ({3:.3f})\n'],
                'Vrad':   [r'V$_{rad}$ =',' {0:.2f} +{1:.2f}/-{2:.2f} ({3:.2f})\n'],
-               'Vstellar':   [r'V$_{stellar}$ =',' {0:.2f} +{1:.2f}/-{2:.2f} ({3:.2f})\n'],
-               'Dist':   [r'Dist =',' {0:.1f} +{1:.1f}/-{2:.1f} ({3:.1f})\n'],
-               'Av':     [r'A$_{v}$ =',' {0:.1f} +{1:.1f}/-{2:.1f} ({3:.1f})\n'],
+               'Vstellar':   [r'V$_{\bigstar}$ =',' {0:.2f} +{1:.2f}/-{2:.2f} ({3:.2f})\n'],
+               'Dist':   [r'Dist =',' {0:.3f} +{1:.3f}/-{2:.3f} ({3:.3f})\n'],
+               'Av':     [r'A$_{v}$ =',' {0:.3f} +{1:.3f}/-{2:.3f} ({3:.3f})\n'],
                'log(Age)':       [r'log(Age) =',' {0:.3f} +{1:.3f}/-{2:.3f} ({3:.3f})\n'],
-               'initial_[Fe/H]': [r'[Fe/H]$_{i}$ =',' {0:.3f} +{1:.3f}/-{2:.3f} ({3:.3f})\n'],
-               'initial_[a/Fe]': [r'[a/Fe]$_{i}$ =',' {0:.3f} +{1:.3f}/-{2:.3f} ({3:.3f})\n'],
-               'initial_Mass':   [r'Mass$_{i}$ =',' {0:.3f} +{1:.3f}/-{2:.3f} ({3:.3f})\n'],
-               'log(L)':         [r'log(L) =',' {0:.3f} +{1:.3f}/-{2:.3f} ({3:.3f})\n']})
+               # 'initial_[Fe/H]': [r'[Fe/H]$_{i}$ =',' {0:.3f} +{1:.3f}/-{2:.3f} ({3:.3f})\n'],
+               # 'initial_[a/Fe]': [r'[a/Fe]$_{i}$ =',' {0:.3f} +{1:.3f}/-{2:.3f} ({3:.3f})\n'],
+               # 'initial_Mass':   [r'Mass$_{i}$ =',' {0:.3f} +{1:.3f}/-{2:.3f} ({3:.3f})\n'],
+               '[Fe/H]': [r'[Fe/H] =',' {0:.3f} +{1:.3f}/-{2:.3f} ({3:.3f})\n'],
+               '[a/Fe]': [r'[a/Fe] =',' {0:.3f} +{1:.3f}/-{2:.3f} ({3:.3f})\n'],
+               'Mass':   [r'Mass =',' {0:.3f} +{1:.3f}/-{2:.3f} ({3:.3f})\n'],
+               'log(L)':         [r'log(L) =',' {0:.3f} +{1:.3f}/-{2:.3f} ({3:.3f})\n'],
+               'log(R)':         [r'log(R) =',' {0:.3f} +{1:.3f}/-{2:.3f} ({3:.3f})\n'],
+               })
 
           for kk in self.pararr:
                outstat_i = outstat[kk]
@@ -236,17 +245,12 @@ class postproc(object):
 
           self.mkcornerfig(fig,pltpars,SAMPLEStab,truth=indata_i)
 
-          axspec = fig.add_axes([0.3,0.75,0.65,0.15])
-          axspecr = fig.add_axes([0.3,0.90,0.65,0.05])
+          axspec = fig.add_axes([0.45,0.60,0.47,0.25])
+          axspecr = fig.add_axes([0.45,0.85,0.47,0.05])
 
           self.mkspec(axspec,axspecr,SAMPLEStab)
 
-          axSED = fig.add_axes([0.62,0.54,0.325,0.175])
-          axMAG = fig.add_axes([0.62,0.43,0.325,0.10])
-
-          # self.mksed(axSED,axMAG,SAMPLEStab)
-
-          plt.figtext(0.785,0.25,parstring,fontsize=10)
+          plt.figtext(0.675,0.35,parstring,fontsize=12)
 
           outputfile = '{0}/{1}.png'.format(pdfpath,starname)
           fig.savefig(outputfile,dpi=250)
@@ -580,224 +584,15 @@ class postproc(object):
           axspec.yaxis.tick_right()
           axspec.yaxis.set_label_position('right')
           axspec.set_xlim(self.spec['obs_wave'].min(),self.spec['obs_wave'].max())
-          axspec.set_ylim(0.75*specmin,1.2*specmax)
+          axspec.set_ylim(0.1*specmin,1.1*specmax)
 
+          axspecr.set_ylabel(r'$\Delta$ Flux / $\sigma$')
           axspecr.yaxis.tick_right()          
+          axspecr.yaxis.set_label_position('right')
           axspecr.set_xlim(self.spec['obs_wave'].min(),self.spec['obs_wave'].max())
-          axspecr.set_ylim(0.75*specrmin,1.25*specrmax)
+          axspecr.set_ylim(specrmin,specrmax)
           axspecr.set_xticks([])
 
-     # def mksed(self,axSED,axMAG,samples):
-     #      import star_basis
-     #      import photsys
-     #      from ccm_curve import ccm_curve
-
-     #      SB = star_basis.StarBasis(
-     #           libname='/Users/pcargile/Astro/ckc/ckc_R500.h5',
-     #           use_params=['logt','logg','feh'],
-     #           n_neighbors=1)
-
-     #      # useful constants
-     #      speedoflight = 2.997924e+10
-     #      speedoflight_kms = 2.997924e+5
-     #      lsun = 3.846e33
-     #      pc = 3.085677581467192e18  # in cm
-     #      jansky_cgs = 1e-23
-     #      # value to go from L_sun to erg/s/cm^2 at 10pc
-     #      log_rsun_cgs = np.log10(6.955) + 10.0
-     #      log_lsun_cgs = np.log10(lsun)
-     #      log4pi = np.log10(4 * np.pi)
-
-     #      WAVE_d = photsys.photsys()
-     #      photbands_i = WAVE_d.keys()
-     #      photbands = [x for x in photbands_i if x in self.photdata.keys()]
-     #      WAVE = {pb:WAVE_d[pb][0] for pb in photbands}
-     #      zeropts = {pb:WAVE_d[pb][2] for pb in photbands}
-     #      fitsym = {pb:WAVE_d[pb][-2] for pb in photbands}
-     #      fitcol = {pb:WAVE_d[pb][-1] for pb in photbands}
-     #      filtercurves_i = photsys.filtercurves()
-     #      filtercurves = {pb:filtercurves_i[pb] for pb in photbands}
-
-     #      if self.bfdict['[Fe/H]'] >= 0.25:
-     #           SEDfeh = 0.25
-     #      elif self.bfdict['[Fe/H]'] <= -2.0:
-     #           SEDfeh = -2.0
-     #      else:
-     #           SEDfeh = self.bfdict['[Fe/H]']
-
-     #      if self.bfdict['Teff'] <= 3500.0:
-     #           SEDTeff = 3500.0
-     #      else:
-     #           SEDTeff = self.bfdict['Teff']
-
-     #      if self.bfdict['log(g)'] >= 5.0:
-     #           SEDlogg = 5.0
-     #      else:
-     #           SEDlogg = self.bfdict['log(g)']
-
-
-     #      spec_w,spec_f,_ = SB.get_star_spectrum(
-     #           logt=np.log10(SEDTeff),logg=SEDlogg,feh=SEDfeh)
-          
-     #      if 'log(A)' in self.bfdict.keys():
-     #           lognor = -2.0*self.bfdict['log(A)']+2.0*log_rsun_cgs+log4pi-2.0*np.log10(pc)
-     #           nor = 10.0**lognor
-     #      else:
-     #           to_cgs_i = lsun/(4.0 * np.pi * (pc*self.bfdict['Dist'])**2)
-     #           nor = SB.normalize(logr=self.bfdict['log(R)'])*to_cgs_i
-     #      spec_f = spec_f*nor
-     #      spec_f = spec_f*(speedoflight/((spec_w*1E-8)**2.0))
-
-     #      spec_f = np.nan_to_num(spec_f)
-     #      spcond = spec_f > 1e-32
-     #      spec_f = spec_f[spcond]
-     #      spec_w = spec_w[spcond]
-
-     #      extratio = ccm_curve(spec_w/10.0,self.bfdict['Av']/3.1)                    
-
-     #      axSED.plot(spec_w/(1E+4),np.log10(spec_f/extratio),ls='-',lw=0.5,
-     #           alpha=1.0,zorder=-1,c='m')
-
-
-     #      # do a parameter estimate from the SED alone
-     #      SO = SEDopt(
-     #           inputphot=self.photdata,
-     #           fixedpars={
-     #           'Teff':self.bfdict['Teff'],
-     #           'Av':self.bfdict['Av'],
-     #           'logg':self.bfdict['log(g)'],
-     #           'FeH':self.bfdict['[Fe/H]'],
-     #           },
-     #           returnsed=True,
-     #           )
-     #      sedpars,sedout = SO()
-     #      sedoutkeys = sedout.keys()
-
-     #      # split out data into phot and error dict
-     #      initphot = {kk:self.photdata[kk][0] for kk in sedoutkeys if kk in photbands}
-     #      initphoterr = {kk:self.photdata[kk][1] for kk in sedoutkeys if kk in photbands}
-
-     #      obswave   = np.array([WAVE[kk] for kk in sedoutkeys])
-     #      fitsym    = np.array([fitsym[kk] for kk in sedoutkeys])
-     #      fitcol    = np.array([fitcol[kk] for kk in sedoutkeys])
-     #      fc        = np.array([filtercurves[kk] for kk in sedoutkeys])
-     #      obsmag    = np.array([initphot[kk] for kk in sedoutkeys if kk in photbands])
-     #      obsmagerr = np.array([initphoterr[kk] for kk in sedoutkeys if kk in photbands])
-     #      modmag    = np.array([sedout[kk] for kk in sedoutkeys])
-     #      obsflux_i = np.array([zeropts[kk]*10.0**(initphot[kk]/-2.5) for kk in sedoutkeys if kk in photbands])
-     #      obsflux   = [x*(jansky_cgs)*(speedoflight/((lamb*1E-8)**2.0)) for x,lamb in zip(obsflux_i,obswave)]
-     #      modflux_i = np.array([zeropts[kk]*10.0**(x/-2.5) for x,kk in zip(modmag,sedoutkeys)])
-     #      modflux   = [x*(jansky_cgs)*(speedoflight/((lamb*1E-8)**2.0)) for x,lamb in zip(modflux_i,obswave)]
-
-     #      # plot the observed SED and MAGS
-     #      minobsflx = np.inf
-     #      maxobsflx = -np.inf
-     #      for w,f,mod,s,clr in zip(obswave,obsflux,modflux,fitsym,fitcol):
-     #           if np.log10(f) > -30.0:
-     #                axSED.scatter(w/1E+4,np.log10(mod),marker=s,c='m',zorder=0,s=100)
-     #                axSED.scatter(w/1E+4,np.log10(f),marker=s,c=clr,zorder=1)
-     #                if np.log10(f) < minobsflx:
-     #                     minobsflx = np.log10(f)
-     #                if np.log10(f) > maxobsflx:
-     #                     maxobsflx = np.log10(f)
-
-     #      for w,m,me,mod,s,clr in zip(obswave,obsmag,obsmagerr,modmag,fitsym,fitcol):
-     #           if np.abs(m-mod)/me > 5.0:
-     #                me = np.abs(m-mod)
-     #           if (m < 30) & (m > -30):
-     #                axMAG.scatter(w/1E+4,mod,marker=s,c='m',zorder=-1,s=100)
-     #                axMAG.errorbar(w/1E+4,m,yerr=me,ls='',marker=',',c=clr,zorder=0)
-     #                axMAG.scatter(w/1E+4,m,marker=s,c=clr,zorder=1)
-
-     #      # plot filter curves
-     #      for fc_i,clr in zip(fc,fitcol):
-     #           trans_i = 0.25*fc_i['trans']*(0.9*maxobsflx-1.1*minobsflx)+1.1*minobsflx
-     #           axSED.plot(fc_i['wave']/1E+4,trans_i,ls='-',lw=0.5,c=clr,alpha=1.0)
-
-
-
-
-     #      """
-
-     #      try:
-     #           if SAMPLES_i['[Fe/H]'] >= 0.25:
-     #                SEDfeh_i = 0.25
-     #           elif SAMPLES_i['[Fe/H]'] <= -2.0:
-     #                SEDfeh_i = -2.0
-     #           else:
-     #                SEDfeh_i = SAMPLES_i['[Fe/H]']
-
-     #           if SAMPLES_i['Teff'] <= 3500.0:
-     #                SEDTeff_i = 3500.0
-     #           else:
-     #                SEDTeff_i = SAMPLES_i['Teff']
-
-     #           if SAMPLES_i['log(g)'] >= 5.0:
-     #                SEDlogg_i = 5.0
-     #           else:
-     #                SEDlogg_i = SAMPLES_i['log(g)']
-
-     #           spec_w,spec_f,_ = SB.get_star_spectrum(
-     #                logt=np.log10(SEDTeff_i),logg=SEDlogg_i,feh=SEDfeh_i)
-
-     #           to_cgs_i = lsun/(4.0 * np.pi * (pc*SAMPLES_i['Dist']*1000.0)**2)
-     #           nor = SB.normalize(logr=SAMPLES_i['log(R)'])*to_cgs_i
-
-     #           modphot = self.GM.genphot(
-     #                [SAMPLES_i['Teff'],SAMPLES_i['log(g)'],SAMPLES_i['[Fe/H]'],
-     #                SAMPLES_i['[a/Fe]'],SAMPLES_i['log(R)'],SAMPLES_i['Dist']*1000.0,
-     #                SAMPLES_i['Av'],3.1]
-     #                )
-
-     #           for kk in sedout.keys():
-     #                moddict[kk].append(modphot[kk])
-
-     #           modphot = np.array([modphot[kk] for kk in sedout.keys() if catfilterarr_i[kk] in spec_out_keys])
-                    
-     #           spec_f = spec_f*nor
-     #           spec_f = spec_f*(speedoflight/((spec_w*1E-8)**2.0))
-     #           spec_f = np.nan_to_num(spec_f)
-     #           spcond = spec_f > 1e-32
-     #           spec_f = spec_f[spcond]
-     #           spec_w = spec_w[spcond]     
-
-     #           extratio = ccm_curve(spec_w/10.0,SAMPLES_i['Av']/3.1)
-     #           axSED.plot(spec_w/(1E+4),np.log10(spec_f/extratio),ls='-',lw=2.0,alpha=0.1,zorder=-2,c='blue')
-
-     #           for w,m,s in zip(obswave,modphot,fitsym):
-     #                axMAG.scatter(w/(1E+4),m,marker=s,c='b')
-
-     #      except ValueError:
-     #           pass
-
-     #      """
-
-     #      axSED.set_ylim(1.1*minobsflx,0.9*maxobsflx)
-
-     #      axSED.set_xlim([0.25,6.0])
-     #      axSED.set_xscale('log')
-
-     #      axMAG.set_xlim([0.25,6.0])
-     #      axMAG.set_xscale('log')
-
-     #      axMAG.set_ylim(axMAG.get_ylim()[::-1])
-
-     #      axSED.set_xticks([0.3,0.5,0.7,1.0,3,5])
-     #      axSED.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
-
-     #      axMAG.set_xticks([0.3,0.5,0.7,1,3,5])
-     #      axMAG.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
-
-     #      axSED.set_ylabel(r'log(F$_{\lambda}$) [erg s$^{-1}$ cm$^{-2}$]')
-
-     #      axMAG.set_xlabel(r'$\lambda$ [$\mu$m]')
-     #      axMAG.set_ylabel('mag')
-
-     #      axSED.yaxis.tick_right()
-     #      axMAG.yaxis.tick_right()
-     #      axSED.yaxis.set_label_position('right')
-     #      axMAG.yaxis.set_label_position('right')
-     #      axSED.set_xticklabels([])
 
 
 if __name__ == '__main__':
