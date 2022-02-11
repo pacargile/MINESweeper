@@ -41,6 +41,7 @@ Python modules:
 * scipy
 * h5py
 * dynesty 
+* astropy
 
 All of these modules can be installed using a simple pip install [package] except torch. See PyTorch website for installation instructions.
 
