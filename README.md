@@ -42,8 +42,6 @@ Python modules:
 * h5py
 * dynesty 
 
-* torch 
-
 All of these modules can be installed using a simple pip install [package] except torch. See PyTorch website for installation instructions.
 
 Installation
@@ -52,7 +50,7 @@ Installation
 cd <install_dir>
 git clone https://github.com/pacargile/MINESweeper.git
 cd MINESweeper
-python setup.py install (--user)
+python -m pip install .
 ```
 
 Then in Python
@@ -61,9 +59,9 @@ import minesweeper
 ```
 
 MINESweeper is pure python.
-See the [tutorial](demo/) for scripts used to fit mock dwarf and giant stars.
+See the [tutorial](demo/) for scripts used to fit a dwarf star.
 
-To use MINESweepr the user must have the MIST mass-tracks in a HDF5 format, as well as the ANN for calculating synthetic photometry. Please contact <pcargile@cfa.harvard.edu> to get the latest model files.
+To use MINESweepr the user must have the MIST mass-tracks in a HDF5 format, as well as the ANN for calculating synthetic spectra and photometry. Please contact <pcargile@cfa.harvard.edu> to get the latest model files.
 
 
 License
