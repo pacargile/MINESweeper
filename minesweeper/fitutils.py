@@ -20,18 +20,28 @@ def polycalc(coef,inwave):
      return poly
 
 def airtovacuum(inwave):
-     """
-          Using the relationship from Ciddor (1996) and transcribed in Shetrone et al. 2015
-     """
-     a = 0.0
-     b1 = 5.792105E-2
-     b2 = 1.67917E-3
-     c1 = 238.0185
-     c2 = 57.362
+    """
+        Using the relationship from Ciddor (1996) and transcribed in Shetrone et al. 2015
+    """
 
-     deltawave = a + (b1/(c1-(1.0/inwave**2.0))) + (b2/(c2-(1.0/inwave**2.0)))
+    inwave = inwave * (1E-4)
 
-     return inwave*(deltawave+1)
+    a = 0.0
+    b1 = 5.792105E-2
+    b2 = 1.67917E-3
+    c1 = 238.0185
+    c2 = 57.362
+
+    deltawave = a + (b1/(c1-(1.0/inwave**2.0))) + (b2/(c2-(1.0/inwave**2.0)))
+
+    return (inwave*(deltawave+1)) * (1E4)
+
+def vacuumtoair(inwave):
+    s = (10**4) / inwave
+    s2 = s**2.0
+    n = 1.0 + 0.0000834254 + 0.02406147 / (130.0 - s2) + 0.00015998 / (38.9 - s2)
+
+    return inwave / n
 
 class RVcalc(object):
      def __init__(self, **kwargs):
