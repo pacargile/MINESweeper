@@ -678,13 +678,15 @@ class FitMS(object):
 def lnprobfn(pars,likeobj,priorobj):
 
      lnlike = likeobj.lnlikefn(pars)
-          
+
      if lnlike == -np.inf:
+          print(pars, 'LIKE = -inf')
           return -np.inf
 
      lnprior = priorobj.lnpriorfn(likeobj.parsdict)
 
      if lnprior == -np.inf:
+          print(pars, 'PRIOR = -inf')
           return -np.inf
 
      return lnprior + lnlike  
