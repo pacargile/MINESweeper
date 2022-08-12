@@ -489,7 +489,6 @@ class prior(object):
           # Spectra Priors
           if self.spec_bool:
                specPrior = self.lnprior_spec(parsdict)
-               print(parsdict,specPrior)
           else:
                specPrior = 0.0
 
