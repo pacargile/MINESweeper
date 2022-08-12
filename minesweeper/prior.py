@@ -551,14 +551,13 @@ class prior(object):
           if len(self.additionalpriors.keys()) > 0:
                for kk in self.additionalpriors.keys():
                     lnprior_i = 0.0
-                    if kk in parsdict.keys():
-                         print(kk,parsdict[kk],self.additionalpriors[kk],lnprior_i)
                     # check to see if additional prior is for a spectroscopic parameter
                     if kk in ['Teff','log(g)','[Fe/H]','[a/Fe]','Vrad','Vrot','Vmic','Inst_R']:
                          # if prior is Gaussian
                          if 'uniform' in self.additionalpriors[kk].keys():
                               if ((parsdict[kk] < self.additionalpriors[kk]['uniform'][0]) or 
                                    (parsdict[kk] > self.additionalpriors[kk]['uniform'][1])):
+                                   print(kk,parsdict[kk],self.additionalpriors[kk],lnprior_i)
                                    return -np.inf
                          if 'gaussian' in self.additionalpriors[kk].keys():
                               lnprior += -0.5 * (((parsdict[kk]-self.additionalpriors[kk]['gaussian'][0])**2.0)/
@@ -566,6 +565,7 @@ class prior(object):
                          if 'tgaussian' in self.additionalpriors[kk].keys():
                               if ((parsdict[kk] < self.additionalpriors[kk]['tgaussian'][0]) or 
                                    (parsdict[kk] > self.additionalpriors[kk]['tgaussian'][1])):
+                                   print(kk,parsdict[kk],self.additionalpriors[kk],lnprior_i)
                                    return -np.inf                              
                          if 'beta' in self.additionalpriors[kk].keys():
                               raise IOError('Beta Prior not implimented yet!!!')
