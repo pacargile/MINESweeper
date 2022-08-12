@@ -13,6 +13,7 @@ class GenMod(object):
           self.verbose = kwargs.get('verbose',False)
 
      def _initspecnn(self,nnpath=None,**kwargs):
+          print(nnpath)
 
           from .fitutils import polycalc
           # if NNtype == 'PC':
@@ -21,16 +22,20 @@ class GenMod(object):
           #      from Payne.predict.ystpred import PayneSpecPredict
 
           NNtype = kwargs.get('NNtype','YST1')
+          print(NNtype)
           if NNtype == 'YST1':
                from Payne.predict.ystpred import PayneSpecPredict
           else:
+               print('import PayneSpecPredict')
                from Payne.predict.predictspec import PayneSpecPredict
 
           # initialize the Payne Spectrum Predictor
           Cnnpath = kwargs.get('Cnnpath',None)
+          print(Cnnpath)
           if Cnnpath is None:
                self.PP = PayneSpecPredict(nnpath=nnpath)
           else:
+               print('initialize PP')
                self.PP = PayneSpecPredict(nnpath=nnpath,Cnnpath=Cnnpath)
 
      def _initphotnn(self,filterarray=None,nnpath=None,**kwargs):
