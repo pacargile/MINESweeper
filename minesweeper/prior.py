@@ -526,11 +526,12 @@ class prior(object):
                              parsdict.pop("Age")
                          except KeyError:
                               pass
-                    try:
-                         if np.isnan(lnprior_i):
-                              print(kk,parsdict[kk],self.additionalpriors[kk],lnprior_i)
-                    except KeyError:
-                         pass
+                    print(kk,parsdict[kk],self.additionalpriors[kk],lnprior_i)
+                    # try:
+                    #      if np.isnan(lnprior_i):
+                    #           print(kk,parsdict[kk],self.additionalpriors[kk],lnprior_i)
+                    # except KeyError:
+                    #      pass
 
                     lnprior += lnprior_i
 
