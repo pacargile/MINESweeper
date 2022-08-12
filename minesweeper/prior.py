@@ -390,6 +390,8 @@ class prior(object):
                else:
                     Mass = parsdict['initial_Mass']     
                advPrior += float(self.AP.imf_lnprior(Mass))
+               print('IMF',advPrior)
+
 
           if self.gal_bool or self.galage_bool:
                if np.isfinite(parsdict['log(Age)']) & np.isfinite(parsdict['Dist']):
@@ -418,6 +420,7 @@ class prior(object):
                     # no gal age prior, just denisty prior
                     lnp_age = 0.0
 
+               print('GAL',advPrior)
                advPrior += (lnp_dist+lnp_age)
 
           # if self.gal_bool:
@@ -436,6 +439,8 @@ class prior(object):
                     dwarf=self.vrotpars['dwarf'],
                     giant=self.vrotpars['giant'],
                     ))
+               print('VROT',advPrior)
+
 
           if self.vtot_bool:
                if 'Vrad' not in parsdict.keys():
@@ -484,6 +489,7 @@ class prior(object):
           # Spectra Priors
           if self.spec_bool:
                specPrior = self.lnprior_spec(parsdict)
+               print(parsdict,specPrior)
           else:
                specPrior = 0.0
 
@@ -526,7 +532,7 @@ class prior(object):
                              parsdict.pop("Age")
                          except KeyError:
                               pass
-                    print(kk,parsdict[kk],self.additionalpriors[kk],lnprior_i)
+                    # print(kk,parsdict[kk],self.additionalpriors[kk],lnprior_i)
                     # try:
                     #      if np.isnan(lnprior_i):
                     #           print(kk,parsdict[kk],self.additionalpriors[kk],lnprior_i)
@@ -545,6 +551,7 @@ class prior(object):
           if len(self.additionalpriors.keys()) > 0:
                for kk in self.additionalpriors.keys():
                     lnprior_i = 0.0
+                    print(kk,parsdict[kk],self.additionalpriors[kk],lnprior_i)
                     # check to see if additional prior is for a spectroscopic parameter
                     if kk in ['Teff','log(g)','[Fe/H]','[a/Fe]','Vrad','Vrot','Vmic','Inst_R']:
                          # if prior is Gaussian
@@ -563,6 +570,7 @@ class prior(object):
                               raise IOError('Beta Prior not implimented yet!!!')
                          if 'log-normal' in self.additionalpriors[kk].keys():
                               raise IOError('Log-Normal Prior not implimented yet!!!')
+
           # # if fitting a blaze function, then check for additional priors
           # if self.modpoly_bool:
           #    for pp in self.fitpars_i:
