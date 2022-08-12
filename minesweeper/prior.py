@@ -551,7 +551,8 @@ class prior(object):
           if len(self.additionalpriors.keys()) > 0:
                for kk in self.additionalpriors.keys():
                     lnprior_i = 0.0
-                    print(kk,parsdict[kk],self.additionalpriors[kk],lnprior_i)
+                    if kk in parsdict.keys():
+                         print(kk,parsdict[kk],self.additionalpriors[kk],lnprior_i)
                     # check to see if additional prior is for a spectroscopic parameter
                     if kk in ['Teff','log(g)','[Fe/H]','[a/Fe]','Vrad','Vrot','Vmic','Inst_R']:
                          # if prior is Gaussian
