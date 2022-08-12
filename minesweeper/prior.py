@@ -556,7 +556,6 @@ class prior(object):
                          if 'uniform' in self.additionalpriors[kk].keys():
                               if ((parsdict[kk] < self.additionalpriors[kk]['uniform'][0]) or 
                                    (parsdict[kk] > self.additionalpriors[kk]['uniform'][1])):
-                                   print(kk,parsdict[kk],self.additionalpriors[kk],lnprior_i)
                                    return -np.inf
                          if 'gaussian' in self.additionalpriors[kk].keys():
                               lnprior += -0.5 * (((parsdict[kk]-self.additionalpriors[kk]['gaussian'][0])**2.0)/
@@ -564,7 +563,6 @@ class prior(object):
                          if 'tgaussian' in self.additionalpriors[kk].keys():
                               if ((parsdict[kk] < self.additionalpriors[kk]['tgaussian'][0]) or 
                                    (parsdict[kk] > self.additionalpriors[kk]['tgaussian'][1])):
-                                   print(kk,parsdict[kk],self.additionalpriors[kk],lnprior_i)
                                    return -np.inf                              
                          if 'beta' in self.additionalpriors[kk].keys():
                               raise IOError('Beta Prior not implimented yet!!!')
