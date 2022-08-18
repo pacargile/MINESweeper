@@ -390,7 +390,7 @@ class prior(object):
                else:
                     Mass = parsdict['initial_Mass']     
                advPrior += float(self.AP.imf_lnprior(Mass))
-               print('IMF',advPrior)
+               # print('IMF',advPrior)
 
 
           if self.gal_bool or self.galage_bool:
@@ -420,7 +420,7 @@ class prior(object):
                     # no gal age prior, just denisty prior
                     lnp_age = 0.0
 
-               print('GAL',advPrior)
+               # print('GAL',advPrior)
                advPrior += (lnp_dist+lnp_age)
 
           # if self.gal_bool:
@@ -439,7 +439,7 @@ class prior(object):
                     dwarf=self.vrotpars['dwarf'],
                     giant=self.vrotpars['giant'],
                     ))
-               print('VROT',advPrior)
+               # print('VROT',advPrior)
 
 
           if self.vtot_bool:
