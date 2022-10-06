@@ -251,12 +251,17 @@ class prior(object):
           pcarr = [x_i for x_i in upars.keys() if 'pc' in x_i]
           if len(pcarr) > 0:
                for pc_i in pcarr:
+                    pcind = int(pc_i.split('_')[-1])
+
                     if pc_i == 'pc_0':
-                         uspec_scale = upars['pc_0']
-                         outdict['pc_0'] = (2.0 - 0.5)*uspec_scale + 0.5
+                         # uspec_scale = upars['pc_0']
+                         # outdict['pc_0'] = (2.0 - 0.5)*uspec_scale + 0.5
+
+                         pcmin = self.polycoefarr[pcind][0]
+                         pcmax = self.polycoefarr[pcind][1]
+                         outdict['pc_0'] = (pcmax-pcmin)*upars['pc_0'] + pcmin
+
                     else:
-                         pcind = int(pc_i.split('_')[-1])
-                         
                          # pcmax = self.polycoefarr[pcind][0]+3.0*self.polycoefarr[pcind][1]
                          # pcmin = self.polycoefarr[pcind][0]-3.0*self.polycoefarr[pcind][1]
                          # outdict[pc_i] = (pcmax-pcmin)*upars[pc_i] + pcmin
