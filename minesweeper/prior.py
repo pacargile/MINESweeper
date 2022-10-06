@@ -257,9 +257,19 @@ class prior(object):
                          # uspec_scale = upars['pc_0']
                          # outdict['pc_0'] = (2.0 - 0.5)*uspec_scale + 0.5
 
-                         pcmin = self.polycoefarr[pcind][0]
-                         pcmax = self.polycoefarr[pcind][1]
-                         outdict['pc_0'] = (pcmax-pcmin)*upars['pc_0'] + pcmin
+                         # pcmin = self.polycoefarr[pcind][0]
+                         # pcmax = self.polycoefarr[pcind][1]
+                         # outdict['pc_0'] = (pcmax-pcmin)*upars['pc_0'] + pcmin
+
+                         loc = self.polycoefarr[pcind][0]
+                         scale = self.polycoefarr[pcind][1]
+                         minval = loc - 5.0 * scale 
+                         maxval = loc + 5.0 * scale
+                         a = (minval - loc) / scale
+                         b = (maxval - loc) / scale
+                         outdict[pc_i] = truncnorm.ppf(upars[pc_i],a,b,loc=loc,scale=scale)
+
+
 
                     else:
                          # pcmax = self.polycoefarr[pcind][0]+3.0*self.polycoefarr[pcind][1]
