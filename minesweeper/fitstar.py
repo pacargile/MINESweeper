@@ -108,6 +108,9 @@ class FitMS(object):
                if self.fitargs['NNtype'] == 'YST2':
                     for pp in ['Teff','log(g)','[Fe/H]','[a/Fe]','Vrad','Vrot','Vmic','Inst_R']:
                          self.fitpars_bool[pp] = True
+               elif self.fitargs['NNtype'] == 'LinNet':
+                    for pp in ['Teff','log(g)','[Fe/H]','[a/Fe]','Vrad','Vrot','Vmic','Inst_R']:
+                         self.fitpars_bool[pp] = True
                else:
                     for pp in ['Teff','log(g)','[Fe/H]','[a/Fe]','Vrad','Vrot','Inst_R']:
                          self.fitpars_bool[pp] = True
