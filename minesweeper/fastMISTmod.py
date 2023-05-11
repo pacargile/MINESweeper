@@ -66,7 +66,7 @@ class GenMIST(object):
             self.make_lib(misth5)
         self.lib_as_grid()
 
-        searchrad = 1.0
+        searchrad = 2.0
         self.dist = np.sqrt( 
             (searchrad**2.0) + 
             (searchrad**2.0) + 
