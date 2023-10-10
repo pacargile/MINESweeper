@@ -367,6 +367,8 @@ class FitMS(object):
                maxiter=maxiter,
                maxcall=maxcall,
                )):
+               print('LENRES',len(results))
+               print('RESULTS',results)
                (worst, ustar, vstar, loglstar, logvol, logwt, logz, logzvar,
                     h, nc, worst_it, propidx, propiter, eff, delta_logz) = results             
 
