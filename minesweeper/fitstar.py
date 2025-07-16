@@ -368,7 +368,7 @@ class FitMS(object):
                maxcall=maxcall,
                )):
                print(results)
-               (worst, ustar, vstar, loglstar, logvol, logwt, logz, logzvar, h, nc, blob, worst_it, propidx, propiter, eff, delta_logz) = results             
+               (worst, ustar, vstar, loglstar, logvol, logwt, logz, logzvar, h, nc, worst_it, propidx, propiter, eff, delta_logz, blob) = results             
 
                if it == 0:
                     # initialize the output file
@@ -449,7 +449,7 @@ class FitMS(object):
           for it2, results in enumerate(dy_sampler.add_live_points()):
                # split up results
                (worst, ustar, vstar, loglstar, logvol, logwt, logz, logzvar,
-               h, nc, blob, worst_it, boundidx, bounditer, eff, delta_logz) = results
+               h, nc, worst_it, boundidx, bounditer, eff, delta_logz, blob) = results
 
                self.outff.write('{0} '.format(nit+it2))
 
