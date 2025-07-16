@@ -367,6 +367,7 @@ class FitMS(object):
                maxiter=maxiter,
                maxcall=maxcall,
                )):
+               print(results)
                (worst, ustar, vstar, loglstar, logvol, logwt, logz, logzvar, h, nc, blob, worst_it, propidx, propiter, eff, delta_logz) = results             
 
                if it == 0:
