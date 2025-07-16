@@ -367,8 +367,25 @@ class FitMS(object):
                maxiter=maxiter,
                maxcall=maxcall,
                )):
-               print(results)
-               (worst, ustar, vstar, loglstar, logvol, logwt, logz, logzvar, h, nc, worst_it, propidx, propiter, eff, delta_logz, blob) = results             
+               # print(results)
+               # (worst, ustar, vstar, loglstar, logvol, logwt, logz, logzvar, h, nc, worst_it, propidx, propiter, eff, delta_logz, blob) = results             
+
+               worst = results.worst
+               ustar = results.ustar
+               vstar = results.vstar
+               loglstar = results.loglstar
+               logvol = results.logvol
+               logwt = results.logwt
+               logz = results.logz
+               logzvar = results.logzvar
+               h = results.h
+               nc = results.nc
+               worst_it = results.worst_it
+               propidx = results.boundidx
+               propiter = results.bounditer
+               eff = results.eff
+               delta_logz = results.delta_logz
+               blob = results.blob
 
                if it == 0:
                     # initialize the output file
@@ -448,8 +465,25 @@ class FitMS(object):
           # add live points to sampler object
           for it2, results in enumerate(dy_sampler.add_live_points()):
                # split up results
-               (worst, ustar, vstar, loglstar, logvol, logwt, logz, logzvar,
-               h, nc, worst_it, boundidx, bounditer, eff, delta_logz, blob) = results
+               # (worst, ustar, vstar, loglstar, logvol, logwt, logz, logzvar,
+               # h, nc, worst_it, boundidx, bounditer, eff, delta_logz, blob) = results
+
+               worst = results.worst
+               ustar = results.ustar
+               vstar = results.vstar
+               loglstar = results.loglstar
+               logvol = results.logvol
+               logwt = results.logwt
+               logz = results.logz
+               logzvar = results.logzvar
+               h = results.h
+               nc = results.nc
+               worst_it = results.worst_it
+               propidx = results.boundidx
+               propiter = results.bounditer
+               eff = results.eff
+               delta_logz = results.delta_logz
+               blob = results.blob
 
                self.outff.write('{0} '.format(nit+it2))
 
